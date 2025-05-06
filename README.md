@@ -1,33 +1,4 @@
-![GitHub contributors](https://img.shields.io/github/contributors/Botsthe/AV-FILE-TO-LINK-PRO?style=flat&color=green)
-![GitHub repo size](https://img.shields.io/github/repo-size/Botsthe/AV-FILE-TO-LINK-PRO?color=green)
-![GitHub](https://img.shields.io/github/license/Botsthe/AV-FILE-TO-LINK-PRO?color=green)
 
-### Demo Bot
-
-Here is our Demo bot -
-
-[![Click Here](https://img.shields.io/badge/Demo%20Bot-Click%20Here-blue?style=flat&logo=telegram&labelColor=white&link=https://t.me/AV_SUPPORT_GROUP)](https://t.me/AV_F2L_BOT)
-
-### Need Deployment Support?
-
-If you encounter any issues deploying the bot, feel free to seek assistance in our support group:
-
-[![Join Support Group](https://img.shields.io/badge/Join%20Support%20Group-Click%20Here-blue?style=flat&logo=telegram&labelColor=white&link=https://t.me/AV_SUPPORT_GROUP)](https://t.me/AV_SUPPORT_GROUP)
-
-  <h1 align="center"></h1>
-<p align="center"> 
-  <img src="https://envs.sh/_pM.jpg" alt="Cover Image" width="650">
-  </a>
- <p align="center">
-    A Telegram bot to turn all media and documents files to instant direct download and stream link .
-    <br />
-   </strong></a>
-    <br />
-    <a href="https://t.me/AV_SUPPORT_GROUP">Report a Bug</a>
-    |
-    <a href="https://t.me/AV_SUPPORT_GROUP">Request Feature</a>
-  </p>
-<hr>
 
 ### ALL VARIABLES
 
@@ -124,19 +95,3 @@ python3 bot.py
 - And many more... 
 
 </details>
-
-### CREDIT GITHUB 
-
-- [BOTSTHE](https://github.com/Botsthe)
-
-### CONTACT DEVELOPER
-
-- [𝙰𝙼𝙰𝙽 𝚅𝙸𝚂𝙷𝚆𝙰𝙺𝙰𝚁𝙼𝙰](https://telegram.me/BOT_OWNER26)
-
-### BUY ME A COFFEE
-
-- [PHONE PE](https://envs.sh/Hgz.jpg)
-
-### 📌 NOTE
-
-𝘊𝘰𝘱𝘺𝘪𝘯𝘨 𝘰𝘳 𝘚𝘦𝘭𝘭𝘪𝘯𝘨 𝘵𝘩𝘪𝘴 𝘳𝘦𝘱𝘰 𝘪𝘴 𝘴𝘵𝘳𝘪𝘤𝘵𝘭𝘺 𝘱𝘳𝘰𝘩𝘪𝘣𝘪𝘵𝘦𝘥.</b>

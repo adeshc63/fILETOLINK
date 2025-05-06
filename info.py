@@ -10,14 +10,14 @@ id_pattern = re.compile(r'^.\d+$')
 # Bot information
 SESSION = environ.get('SESSION', 'Webavbot')
 API_ID = int(environ.get('API_ID', '12345678'))
-API_HASH = environ.get('API_HASH', '812529feb49f578FHB5d1')
-BOT_TOKEN = environ.get('BOT_TOKEN', "7091568:AAGpX2rVUnDHCYV-96GJVUV")
-BOT_USERNAME = environ.get("BOT_USERNAME", 'AV_F2L_BOT') # without @ 
+API_HASH = environ.get('API_HASH', '65b01e4ef42f8b3a1d5fd988e5aee5c9')
+BOT_TOKEN = environ.get('BOT_TOKEN', "1587356098:AAFoXvkUzi3_O116zyr4L9R8tQ0w54joG54")
+BOT_USERNAME = environ.get("BOT_USERNAME", 'Adsh4_bot') # without @ 
 
 # Admins, Channels & Users
 BIN_CHANNEL = int(environ.get("BIN_CHANNEL", '-100')) # admin your channel in stream 
 LOG_CHANNEL = int(environ.get("LOG_CHANNEL", '-100')) # admin your channel in users log 
-ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '5977931010').split()] # 3567788, 678899, 5889467
+ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '821243884').split()] # 3567788, 678899, 5889467
 OWNER_USERNAME = environ.get("OWNER_USERNAME", 'BOT_OWNER26') # without @ 
 
 # pics information
@@ -46,7 +46,7 @@ BAN_CHNL = [int(ban_chal) if id_pattern.search(ban_chal) else ban_chal for ban_c
 BAN_ALERT = environ.get('BAN_ALERT' , '<b>ʏᴏᴜʀ ᴀʀᴇ ʙᴀɴɴᴇᴅ ᴛᴏ ᴜsᴇ ᴛʜɪs ʙᴏᴛ.ᴄᴏɴᴛᴀᴄᴛ [ᴀᴠ ᴄʜᴀᴛ ᴏᴡɴᴇʀ](https://telegram.me/AV_OWNER_BOT) ᴛᴏ ʀᴇsᴏʟᴠᴇ ᴛʜᴇ ɪssᴜᴇ!!</b>')
 
 # MongoDB information
-DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://")
+DATABASE_URI = environ.get('DATABASE_URI', "mongodb+srv://Lodu12:Lodu12@doremon.reqbb.mongodb.net/")
 DATABASE_NAME = environ.get('DATABASE_NAME', "cluster0")
 
 # fsub  information

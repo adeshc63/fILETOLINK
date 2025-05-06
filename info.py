@@ -15,8 +15,8 @@ BOT_TOKEN = environ.get('BOT_TOKEN', "1587356098:AAFoXvkUzi3_O116zyr4L9R8tQ0w54j
 BOT_USERNAME = environ.get("BOT_USERNAME", 'Adsh4_bot') # without @ 
 
 # Admins, Channels & Users
-BIN_CHANNEL = int(environ.get("BIN_CHANNEL", '-100')) # admin your channel in stream 
-LOG_CHANNEL = int(environ.get("LOG_CHANNEL", '-100')) # admin your channel in users log 
+BIN_CHANNEL = int(environ.get("BIN_CHANNEL", '-1002141063405')) # admin your channel in stream 
+LOG_CHANNEL = int(environ.get("LOG_CHANNEL", '-1002141063405')) # admin your channel in users log 
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '821243884').split()] # 3567788, 678899, 5889467
 OWNER_USERNAME = environ.get("OWNER_USERNAME", 'BOT_OWNER26') # without @ 
 
@@ -51,7 +51,7 @@ DATABASE_NAME = environ.get('DATABASE_NAME', "FileStream")
 
 # fsub  information
 AUTH_PICS = environ.get('AUTH_PICS', 'https://envs.sh/AwV.jpg')              
-AUTH_CHANNEL = (environ.get("AUTH_CHANNEL", "-100"))
+AUTH_CHANNEL = (environ.get("AUTH_CHANNEL", "-1002141063405"))
 FSUB = environ.get("FSUB", True)
 
 # port information

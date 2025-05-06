@@ -10,6 +10,9 @@
 <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
+<!-- Include Hls.js for HLS streaming and Shaka Player for more format support -->
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.js"></script>
 <style>
 :root {
 --primary: #FF3366;
@@ -298,6 +301,61 @@ font-weight: 500;
 color: var(--dark);
 opacity: 0.7;
 }
+
+/* Loading indicator styles */
+.loading-indicator {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(0, 0, 0, 0.7);
+    z-index: 10;
+    color: white;
+    font-family: 'Space Grotesk', sans-serif;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: var(--primary);
+    animation: spin 1s ease-in-out infinite;
+    margin-bottom: 15px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Feedback message styles */
+.feedback {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--accent2);
+    color: var(--dark);
+    padding: 12px 20px;
+    border-radius: 0;
+    border: 3px solid var(--dark);
+    box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+    font-family: 'Space Grotesk', sans-serif;
+    font-weight: 700;
+    z-index: 1000;
+    max-width: 90%;
+    text-align: center;
+}
+
+.feedback.error {
+    background-color: var(--primary);
+    color: white;
+}
 </style>
 </head>
 <body>
@@ -369,46 +427,340 @@ KM Player
 
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-const videoElement = document.querySelector('.plyr');
-const player = new Plyr(videoElement, {
-controls: [
-'play-large', 'play', 'progress', 'current-time', 'mute',
-'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-]
-});
-});
-
+// Global variables
+let plyrPlayer;
+let shakaInstance = null;
 const currentUrl = window.location.href;
 const finalUrl = currentUrl.replace("/watch/", "/dl/");
+const fileUrl = '{{file_url}}';
+const fileName = '{{file_name}}';
+
+document.addEventListener('DOMContentLoaded', () => {
+    const videoElement = document.querySelector('.plyr');
+    const fileExtension = getFileExtension(fileName);
+    
+    // Add loading indicator
+    const loadingIndicator = document.createElement('div');
+    loadingIndicator.className = 'loading-indicator';
+    loadingIndicator.innerHTML = '<div class="spinner"></div><p>Loading video...</p>';
+    document.querySelector('.video-wrapper').appendChild(loadingIndicator);
+    
+    // Initialize Plyr with more controls and better performance settings
+    plyrPlayer = new Plyr(videoElement, {
+        controls: [
+            'play-large', 'rewind', 'play', 'fast-forward', 'progress', 'current-time', 
+            'duration', 'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+        ],
+        settings: ['captions', 'quality', 'speed'],
+        seekTime: 5,
+        keyboard: { focused: true, global: true },
+        tooltips: { controls: true, seek: true },
+        previewThumbnails: { enabled: false },
+        disableContextMenu: false,
+        debug: false
+    });
+    
+    // Add event listeners for video loading states
+    videoElement.addEventListener('loadstart', () => {
+        loadingIndicator.style.display = 'flex';
+    });
+    
+    videoElement.addEventListener('canplay', () => {
+        loadingIndicator.style.display = 'none';
+    });
+    
+    videoElement.addEventListener('error', (e) => {
+        console.error('Native video error:', e);
+        loadingIndicator.innerHTML = '<div class="spinner"></div><p>Error loading video. Trying alternative method...</p>';
+    });
+    
+    // Choose the appropriate player based on file extension and format
+    if (['mkv', 'webm', 'avi', 'mov', 'flv', 'ts'].includes(fileExtension)) {
+        // Use Shaka Player for more complex formats
+        initShaka();
+    } else if (fileExtension === 'm3u8' || fileUrl.includes('.m3u8')) {
+        // Use HLS.js for HLS streams
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                maxBufferLength: 60,
+                maxMaxBufferLength: 120,
+                enableWorker: true
+            });
+            hls.loadSource(fileUrl);
+            hls.attachMedia(videoElement);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                videoElement.play().catch(e => console.warn('Auto-play prevented:', e));
+                loadingIndicator.style.display = 'none';
+            });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                if (data.fatal) {
+                    console.error('HLS error:', data);
+                    // Fall back to Shaka as a second attempt
+                    initShaka();
+                }
+            });
+        } else {
+            // Fall back to Shaka if HLS.js is not supported
+            initShaka();
+        }
+    } else {
+        // For MP4 and other formats that work well with native player
+        videoElement.src = fileUrl;
+    }
+    
+    // Add network connection monitoring
+    window.addEventListener('online', function() {
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.textContent = "🌐 Network connection restored. Resuming playback...";
+        document.body.appendChild(feedback);
+        setTimeout(() => feedback.remove(), 3000);
+        
+        // Try to resume playback
+        if (videoElement.paused && videoElement.readyState > 1) {
+            videoElement.play().catch(e => console.warn('Auto-play prevented:', e));
+        }
+    });
+    
+    window.addEventListener('offline', function() {
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback error';
+        feedback.textContent = "⚠️ Network connection lost. Playback may be interrupted.";
+        document.body.appendChild(feedback);
+        setTimeout(() => feedback.remove(), 5000);
+    });
+});
+
+// Get file extension from filename
+function getFileExtension(filename) {
+    return filename.split('.').pop().toLowerCase();
+}
+
+// Initialize Shaka Player for MKV and other formats
+function initShaka() {
+    console.log("Initializing Shaka Player for MKV");
+    shaka.polyfill.installAll();
+    
+    const video = document.querySelector('video');
+    
+    if (shaka.Player.isBrowserSupported()) {
+        shakaInstance = new shaka.Player(video);
+        
+        // Listen for error events
+        shakaInstance.addEventListener('error', onErrorEvent);
+        
+        // Configure Shaka Player for better performance and reliability
+        shakaInstance.configure({
+            streaming: {
+                bufferingGoal: 60,  // Buffer up to 60 seconds
+                rebufferingGoal: 15, // Have at least 15 seconds buffered before resuming playback
+                bufferBehind: 30,    // Keep 30 seconds of content behind the playhead
+                retryParameters: {
+                    maxAttempts: 5,   // Try 5 times before giving up
+                    baseDelay: 1000, // Start with a 1-second delay between retries
+                    backoffFactor: 2 // Double the delay each time
+                },
+                failureCallback: function(error) {
+                    console.warn('Streaming failure, attempting recovery:', error);
+                    // Try to recover automatically
+                    if (shakaInstance) {
+                        shakaInstance.retryStreaming();
+                    }
+                }
+            },
+            abr: {
+                enabled: true,
+                defaultBandwidthEstimate: 1000000 // 1Mbps initial estimate
+            }
+        });
+        
+        // Try to load the video
+        shakaInstance.load(fileUrl).then(function() {
+            console.log('MKV loaded successfully');
+            
+            // Get available audio tracks
+            const tracks = shakaInstance.getVariantTracks();
+            const audioTrackSelect = document.getElementById('audio-track-select');
+            
+            // Clear the loading option
+            audioTrackSelect.innerHTML = '';
+            
+            // Group tracks by audio language
+            const audioLanguages = {};
+            tracks.forEach(track => {
+                if (track.audioId) {
+                    const lang = track.language || 'Unknown';
+                    if (!audioLanguages[lang]) {
+                        audioLanguages[lang] = [];
+                    }
+                    audioLanguages[lang].push(track);
+                }
+            });
+            
+            // If no audio tracks found
+            if (Object.keys(audioLanguages).length === 0) {
+                const option = document.createElement('option');
+                option.text = 'No audio tracks available';
+                option.disabled = true;
+                audioTrackSelect.appendChild(option);
+            } else {
+                // Add options for each language
+                Object.keys(audioLanguages).forEach(lang => {
+                    const track = audioLanguages[lang][0]; // Use the first track of each language
+                    const option = document.createElement('option');
+                    option.value = track.id;
+                    option.text = `${lang} (${track.audioCodec || 'Unknown codec'})`;
+                    option.selected = track.active;
+                    audioTrackSelect.appendChild(option);
+                });
+                
+                // Add event listener for audio track selection
+                audioTrackSelect.addEventListener('change', function() {
+                    const selectedTrackId = parseInt(this.value);
+                    const selectedTrack = tracks.find(track => track.id === selectedTrackId);
+                    if (selectedTrack) {
+                        shakaInstance.selectVariantTrack(selectedTrack, true);
+                    }
+                });
+            }
+            
+            // Add periodic network status check
+            setInterval(function() {
+                if (shakaInstance && video.paused && video.readyState < 3) {
+                    console.log('Detected stalled playback, attempting recovery');
+                    // Try to recover by reloading the current position
+                    const currentTime = video.currentTime;
+                    shakaInstance.retryStreaming().then(() => {
+                        video.currentTime = currentTime;
+                    });
+                }
+            }, 5000); // Check every 5 seconds
+            
+        }).catch(onError);
+    } else {
+        console.error('Browser not supported for Shaka Player');
+        // Fallback to regular player
+        video.src = fileUrl;
+    }
+}
+
+// Error handling for Shaka Player
+function onErrorEvent(event) {
+    onError(event.detail);
+}
+
+function onError(error) {
+    console.error('Error loading video:', error);
+    
+    // Show user-friendly error message
+    const errorFeedback = document.createElement('div');
+    errorFeedback.className = 'feedback error';
+    errorFeedback.textContent = "Video playback error detected. Attempting to recover...";
+    errorFeedback.setAttribute("role", "alert");
+    document.body.appendChild(errorFeedback);
+    
+    // Try to recover based on error type
+    const video = document.querySelector('video');
+    const currentTime = video.currentTime;
+    
+    // If Shaka instance exists, try to destroy it properly before fallback
+    if (shakaInstance) {
+        try {
+            shakaInstance.unload();
+        } catch (e) {
+            console.warn('Error unloading Shaka player:', e);
+        }
+        shakaInstance = null;
+    }
+    
+    // Try HLS.js if the file might be HLS format
+    if (fileUrl.includes('.m3u8') || error.code === shaka.util.Error.Code.MANIFEST_PARSE_FAILURE) {
+        console.log('Trying HLS.js fallback');
+        if (Hls.isSupported()) {
+            const hls = new Hls({
+                maxBufferLength: 60,
+                maxMaxBufferLength: 120,
+                enableWorker: true,
+                lowLatencyMode: false,
+                backBufferLength: 90
+            });
+            hls.loadSource(fileUrl);
+            hls.attachMedia(video);
+            hls.on(Hls.Events.MANIFEST_PARSED, function() {
+                video.currentTime = currentTime;
+                video.play().catch(e => console.warn('Auto-play prevented:', e));
+                setTimeout(() => errorFeedback.remove(), 3000);
+            });
+            hls.on(Hls.Events.ERROR, function(event, data) {
+                console.warn('HLS error:', data);
+                if (data.fatal) {
+                    fallbackToNative();
+                }
+            });
+            return;
+        }
+    }
+    
+    // Final fallback to native player
+    fallbackToNative();
+    
+    function fallbackToNative() {
+        console.log('Falling back to native video player');
+        // Try to use native player with direct URL
+        video.src = fileUrl;
+        video.currentTime = currentTime;
+        video.play().catch(e => console.warn('Auto-play prevented:', e));
+        
+        // Add event listeners to detect if native playback is working
+        let playbackStarted = false;
+        let checkTimeout;
+        
+        video.addEventListener('playing', function onPlaying() {
+            playbackStarted = true;
+            errorFeedback.textContent = "Playback recovered!";
+            setTimeout(() => errorFeedback.remove(), 3000);
+            video.removeEventListener('playing', onPlaying);
+            clearTimeout(checkTimeout);
+        });
+        
+        // If playback doesn't start within 5 seconds, show permanent error
+        checkTimeout = setTimeout(() => {
+            if (!playbackStarted) {
+                errorFeedback.textContent = "Unable to play this video. Try downloading instead.";
+                errorFeedback.style.backgroundColor = "#FF3366";
+                // Don't remove the error message
+            }
+        }, 5000);
+    }
+}
 
 function playOnline(player) {
-const playerUrls = {
-vlc: `vlc://${finalUrl}`,
-mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
-mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
-np: `nplayer-${finalUrl}`,
-sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
-};
-window.location.href = playerUrls[player] || finalUrl;
+    const playerUrls = {
+        vlc: `vlc://${finalUrl}`,
+        mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
+        mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
+        np: `nplayer-${finalUrl}`,
+        sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
+        km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
+    };
+    window.location.href = playerUrls[player] || finalUrl;
 }
 
 function download() {
-window.location.href = finalUrl;
+    window.location.href = finalUrl;
 }
 
 function copyLink() {
-navigator.clipboard.writeText(finalUrl)
-.then(() => {
-const feedback = document.createElement('div');
-feedback.className = 'feedback';
-feedback.textContent = "📋 Link copied to clipboard!";
-feedback.setAttribute("role", "alert");
-document.body.appendChild(feedback);
-setTimeout(() => feedback.remove(), 3000);
-})
-.catch(err => console.error('Could not copy text: ', err));
+    navigator.clipboard.writeText(finalUrl)
+    .then(() => {
+        const feedback = document.createElement('div');
+        feedback.className = 'feedback';
+        feedback.textContent = "📋 Link copied to clipboard!";
+        feedback.setAttribute("role", "alert");
+        document.body.appendChild(feedback);
+        setTimeout(() => feedback.remove(), 3000);
+    })
+    .catch(err => console.error('Could not copy text: ', err));
 }
 </script>
 </body>

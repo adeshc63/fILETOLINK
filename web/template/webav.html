@@ -271,6 +271,186 @@
             100% { transform: translateX(-50%) scale(1); opacity: 1; }
         }
         
+        /* Custom Settings Panels */
+        .custom-settings {
+            margin-top: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .custom-settings-btn {
+            background-color: var(--secondary);
+            color: var(--dark);
+            border: 2px solid var(--dark);
+            padding: 8px 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 700;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+            box-shadow: 2px 2px 0 var(--dark);
+        }
+        
+        .custom-settings-btn:hover {
+            background-color: var(--accent1);
+        }
+        
+        .custom-settings-btn:active {
+            box-shadow: 1px 1px 0 var(--dark);
+            transform: translate(1px, 1px);
+        }
+        
+        .custom-panel {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: rgba(255,255,255,0.9);
+            border: 3px solid var(--dark);
+            padding: 15px;
+            z-index: 100;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+        
+        .custom-panel.show {
+            display: block;
+        }
+        
+        @keyframes slideUp {
+            from { transform: translateY(10px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .panel-title {
+            font-family: 'Unbounded', cursive;
+            font-size: 1.2rem;
+            font-weight: 700;
+        }
+        
+        .close-panel {
+            background: var(--primary);
+            border: 2px solid var(--dark);
+            color: white;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 2px 2px 0 var(--dark);
+        }
+        
+        .close-panel:active {
+            box-shadow: 1px 1px 0 var(--dark);
+            transform: translate(1px, 1px);
+        }
+        
+        .panel-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .quality-btn, .audio-btn, .subtitle-btn {
+            padding: 8px;
+            background-color: white;
+            border: 2px solid var(--dark);
+            font-family: 'Space Grotesk', sans-serif;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: center;
+            box-shadow: 2px 2px 0 var(--dark);
+            transition: all 0.2s ease;
+        }
+        
+        .quality-btn:hover, .audio-btn:hover, .subtitle-btn:hover {
+            background-color: var(--accent1);
+        }
+        
+        .quality-btn.active, .audio-btn.active, .subtitle-btn.active {
+            background-color: var(--primary);
+            color: white;
+        }
+        
+        .quality-btn:active, .audio-btn:active, .subtitle-btn:active {
+            box-shadow: 1px 1px 0 var(--dark);
+            transform: translate(1px, 1px);
+        }
+
+        /* Loading animation */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        
+        .spinner {
+            width: 64px;
+            height: 64px;
+            border: 8px solid var(--accent1);
+            border-top: 8px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Media info */
+        .media-info {
+            margin-top: 15px;
+            padding: 15px;
+            background-color: white;
+            border: 3px solid var(--dark);
+            box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+        }
+        
+        .media-info-header {
+            font-family: 'Unbounded', cursive;
+            font-weight: 700;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .media-info-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .media-info-item {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .media-info-label {
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
         @media (max-width: 768px) {
             h1 {
                 font-size: 1.5rem;
@@ -287,6 +467,18 @@
             
             .social-links {
                 flex-wrap: wrap;
+            }
+            
+            .media-info-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .custom-settings {
+                justify-content: center;
+            }
+            
+            .panel-content {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
             }
         }
 
@@ -308,10 +500,76 @@
         
         <div class="player-container">
             <div class="video-wrapper">
-                <video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
-                    <source src="{{file_url}}" type="video/mp4">
-                    Your browser does not support the video tag.
+                <video id="player" crossorigin playsinline controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
+                    <source src="{{file_url}}" type="video/mp4" id="main-source">
+                    <!-- Additional sources for different formats will be added dynamically -->
                 </video>
+                
+                <div class="loading-overlay" id="loading-overlay">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+            
+            <div class="custom-settings">
+                <button class="custom-settings-btn" id="quality-btn">
+                    <i class="fas fa-cog"></i> Quality
+                </button>
+                <button class="custom-settings-btn" id="audio-btn">
+                    <i class="fas fa-volume-up"></i> Audio
+                </button>
+                <button class="custom-settings-btn" id="subtitle-btn">
+                    <i class="fas fa-closed-captioning"></i> Subtitles
+                </button>
+            </div>
+            
+            <div class="custom-panel" id="quality-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Select Quality</div>
+                    <div class="close-panel" data-panel="quality-panel">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-content" id="quality-options">
+                    <!-- Quality options will be added dynamically -->
+                    <button class="quality-btn active" data-quality="auto">Auto</button>
+                    <button class="quality-btn" data-quality="1080p">1080p</button>
+                    <button class="quality-btn" data-quality="720p">720p</button>
+                    <button class="quality-btn" data-quality="480p">480p</button>
+                    <button class="quality-btn" data-quality="360p">360p</button>
+                </div>
+            </div>
+            
+            <div class="custom-panel" id="audio-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Audio Languages</div>
+                    <div class="close-panel" data-panel="audio-panel">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-content" id="audio-options">
+                    <!-- Audio options will be added dynamically -->
+                </div>
+            </div>
+            
+            <div class="custom-panel" id="subtitle-panel">
+                <div class="panel-header">
+                    <div class="panel-title">Subtitles</div>
+                    <div class="close-panel" data-panel="subtitle-panel">
+                        <i class="fas fa-times"></i>
+                    </div>
+                </div>
+                <div class="panel-content" id="subtitle-options">
+                    <!-- Subtitle options will be added dynamically -->
+                </div>
+            </div>
+        </div>
+
+        <div class="media-info">
+            <div class="media-info-header">
+                <i class="fas fa-info-circle"></i> Media Information
+            </div>
+            <div class="media-info-content" id="media-info-content">
+                <!-- Media info will be added dynamically -->
             </div>
         </div>
 
@@ -363,53 +621,191 @@
         </div>
         
         <div class="copyright">
-            © AV BOTz | @BOT_OWNER26 | @AV_BOTz_UPDATE
+            © marvalzi | @Marvalzod | @drdoom
         </div>
     </div>
 
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.0/hls.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const videoElement = document.querySelector('.plyr');
+            // Set up basic variables
+            const videoElement = document.getElementById('player');
+            const loadingOverlay = document.getElementById('loading-overlay');
+            const currentUrl = window.location.href;
+            const finalUrl = currentUrl.replace("/watch/", "/dl/");
+            const fileName = finalUrl.split('/').pop();
+            
+            // Set file name in the header
+            document.getElementById('file-name').textContent = decodeURIComponent(fileName);
+            
+            // Initialize media info default values
+            const mediaInfoContent = document.getElementById('media-info-content');
+            mediaInfoContent.innerHTML = `
+                <div class="media-info-item">
+                    <div class="media-info-label">Format:</div>
+                    <div class="media-info-value" id="media-format">Detecting...</div>
+                </div>
+                <div class="media-info-item">
+                    <div class="media-info-label">Resolution:</div>
+                    <div class="media-info-value" id="media-resolution">Detecting...</div>
+                </div>
+                <div class="media-info-item">
+                    <div class="media-info-label">Duration:</div>
+                    <div class="media-info-value" id="media-duration">Calculating...</div>
+                </div>
+                <div class="media-info-item">
+                    <div class="media-info-label">Audio Tracks:</div>
+                    <div class="media-info-value" id="media-audio-tracks">Detecting...</div>
+                </div>
+            `;
+            
+            // Initialize Plyr with more controls
             const player = new Plyr(videoElement, {
                 controls: [
-                    'play-large', 'play', 'progress', 'current-time', 'mute',
-                    'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-                ]
+                    'play-large', 'play', 'progress', 'current-time', 'duration',
+                    'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+                ],
+                settings: ['captions', 'quality', 'speed', 'loop'],
+                speed: { selected: 1, options: [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2, 3] },
+                quality: { default: 'auto', options: ['auto', '1080p', '720p', '480p', '360p'] },
+                i18n: {
+                    qualityLabel: {
+                        auto: 'Auto'
+                    },
+                },
+                tooltips: { controls: true, seek: true },
+                keyboard: { focused: true, global: true }
             });
-        });
-
-        const currentUrl = window.location.href;
-        const finalUrl = currentUrl.replace("/watch/", "/dl/");
-        
-        function playOnline(player) {
-            const playerUrls = {
-                vlc: `vlc://${finalUrl}`,
-                mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
-                mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
-                np: `nplayer-${finalUrl}`,
-                sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-                km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
-            };
-            window.location.href = playerUrls[player] || finalUrl;
-        }
-
-        function download() {
-            window.location.href = finalUrl;
-        }
-
-        function copyLink() {
-            navigator.clipboard.writeText(finalUrl)
-                .then(() => {
-                    const feedback = document.createElement('div');
-                    feedback.className = 'feedback';
-                    feedback.textContent = "📋 Link copied to clipboard!";
-                    feedback.setAttribute("role", "alert");
-                    document.body.appendChild(feedback);
-                    setTimeout(() => feedback.remove(), 3000);
-                })
-                .catch(err => console.error('Could not copy text: ', err));
-        }
-    </script>
-</body>
-</html>
+            
+            // Function to detect file type
+            function detectFileType(url) {
+                const extension = url.split('.').pop().toLowerCase();
+                if (extension === 'mp4') {
+                    return 'MP4 Video';
+                } else if (extension === 'mkv') {
+                    return 'MKV Video';
+                } else if (extension === 'webm') {
+                    return 'WebM Video';
+                } else {
+                    return 'Video File';
+                }
+            }
+            
+            // Setup custom panels
+            const panels = ['quality-panel', 'audio-panel', 'subtitle-panel'];
+            const buttons = ['quality-btn', 'audio-btn', 'subtitle-btn'];
+            
+            // Add event listeners to buttons
+            buttons.forEach((btn, index) => {
+                document.getElementById(btn).addEventListener('click', () => {
+                    const panel = document.getElementById(panels[index]);
+                    
+                    // Hide all other panels
+                    panels.forEach(p => {
+                        if (p !== panels[index]) {
+                            document.getElementById(p).classList.remove('show');
+                        }
+                    });
+                    
+                    // Toggle current panel
+                    panel.classList.toggle('show');
+                });
+            });
+            
+            // Add event listeners to close buttons
+            document.querySelectorAll('.close-panel').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const panelId = btn.getAttribute('data-panel');
+                    document.getElementById(panelId).classList.remove('show');
+                });
+            });
+            
+            // Quality selection
+            document.querySelectorAll('.quality-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const quality = btn.getAttribute('data-quality');
+                    
+                    // Update active state
+                    document.querySelectorAll('.quality-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    
+                    // Set quality in player (simplified for demo)
+                    console.log(`Quality selected: ${quality}`);
+                    
+                    // Close panel
+                    document.getElementById('quality-panel').classList.remove('show');
+                    
+                    // Show notification
+                    showFeedback(`Quality changed to ${quality}`);
+                });
+            });
+            
+            // Mock audio tracks (would be detected from video in real implementation)
+            const audioTracks = [
+                { id: 'audio-1', language: 'English', default: true },
+                { id: 'audio-2', language: 'Hindi', default: false },
+                { id: 'audio-3', language: 'Spanish', default: false }
+            ];
+            
+            // Add audio options
+            const audioOptions = document.getElementById('audio-options');
+            audioOptions.innerHTML = '';
+            
+            audioTracks.forEach(track => {
+                const btn = document.createElement('button');
+                btn.className = `audio-btn ${track.default ? 'active' : ''}`;
+                btn.setAttribute('data-audio-id', track.id);
+                btn.textContent = track.language;
+                
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    document.querySelectorAll('.audio-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    
+                    // Simulate changing audio track
+                    console.log(`Audio track changed to ${track.language}`);
+                    
+                    // Close panel
+                    document.getElementById('audio-panel').classList.remove('show');
+                    
+                    // Show notification
+                    showFeedback(`Audio changed to ${track.language}`);
+                });
+                
+                audioOptions.appendChild(btn);
+            });
+            
+            // Mock subtitles (would be detected from video in real implementation)
+            const subtitles = [
+                { id: 'none', language: 'Off', default: true },
+                { id: 'subtitle-1', language: 'English', default: false },
+                { id: 'subtitle-2', language: 'Hindi', default: false },
+                { id: 'subtitle-3', language: 'Spanish', default: false }
+            ];
+            
+            // Add subtitle options
+            const subtitleOptions = document.getElementById('subtitle-options');
+            subtitleOptions.innerHTML = '';
+            
+            subtitles.forEach(subtitle => {
+                const btn = document.createElement('button');
+                btn.className = `subtitle-btn ${subtitle.default ? 'active' : ''}`;
+                btn.setAttribute('data-subtitle-id', subtitle.id);
+                btn.textContent = subtitle.language;
+                
+                btn.addEventListener('click', () => {
+                    // Update active state
+                    document.querySelectorAll('.subtitle-btn').forEach(b => {
+                        b.classList.remove('active');
+                    });
+                    btn.classList.add('active');
+                    
+                    // Simulate changing subtitle
+                    console.log(`Subtitle changed to ${subtitle.language}`);
+                    
+                    //

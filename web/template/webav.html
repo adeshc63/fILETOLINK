@@ -7,6 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 <title>MARVAL ZO | {{file_name}}</title> 
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon"> 
+<link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
 <style> 
@@ -85,96 +86,47 @@ background-color: #000;
 border: 3px solid var(--dark); 
 } 
 
-/* Video player styling */
-#video-container {
+/* VideoJS Custom Styling */
+.video-js {
 width: 100%;
-max-height: 75vh;
-background-color: #000;
-position: relative;
-}
-
-#video {
-width: 100%;
-height: 100%;
+height: 0;
+padding-top: 56.25%; /* 16:9 Aspect Ratio */
 max-height: 75vh;
 }
 
-/* Custom control styling - simplified */
-.shaka-controls-container {
-font-family: 'Space Grotesk', sans-serif !important;
+.video-js .vjs-big-play-button {
+background-color: var(--primary);
+border: 2px solid var(--dark);
+box-shadow: 3px 3px 0 var(--dark);
+border-radius: 0;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
 }
 
-.shaka-controls-button-panel > button {
-background-color: transparent !important;
+.video-js .vjs-big-play-button:hover {
+background-color: var(--accent1);
+transform: translate(-50%, -50%) scale(1.1);
 }
 
-.shaka-controls-button-panel > button:hover {
-background-color: rgba(255, 51, 102, 0.5) !important;
+.video-js .vjs-control-bar {
+background-color: rgba(0, 0, 0, 0.7);
 }
 
-/* Make volume icon visible */
-.shaka-mute-button, .shaka-volume-bar-container {
-opacity: 1 !important;
-visibility: visible !important;
+.video-js .vjs-play-progress,
+.video-js .vjs-volume-level {
+background-color: var(--primary);
 }
 
-/* Audio language selection styling */
-.shaka-audio-languages {
-  color: white !important;
+.video-js .vjs-slider {
+background-color: rgba(255, 255, 255, 0.3);
 }
 
-.shaka-audio-languages .shaka-selected {
-  color: #FF3366 !important;
-  font-weight: bold !important;
+.video-js .vjs-control:focus,
+.video-js .vjs-control:hover {
+background-color: rgba(255, 51, 102, 0.5);
 }
 
-/* Make language menu items more visible */
-.shaka-overflow-menu button span {
-  color: white !important;
-  font-family: 'Space Grotesk', sans-serif !important;
-}
-
-/* Highlight the currently selected language */
-.shaka-overflow-menu button[aria-selected="true"] span {
-  color: #FF3366 !important;
-  font-weight: bold !important;
-}
-
-/* Lighter menu background */
-.shaka-overflow-menu, .shaka-settings-menu {
-background-color: rgba(40, 40, 40, 0.9) !important;
-}
-
-.shaka-overflow-button:hover, .shaka-back-to-overflow-button:hover {
-background-color: rgba(255, 51, 102, 0.5) !important;
-}
-
-.shaka-overflow-menu-button {
-color: white !important;
-font-family: 'Space Grotesk', sans-serif !important;
-}
-
-.shaka-volume-bar-container {
-background-color: rgba(255, 255, 255, 0.4) !important;
-}
-
-.shaka-volume-bar {
-background-color: #FF3366 !important;
-}
-
-.shaka-seek-bar-container {
-background-color: rgba(255, 255, 255, 0.3) !important;
-height: 5px !important;
-}
-
-.shaka-seek-bar-played {
-background-color: #FF3366 !important;
-}
-
-.shaka-seek-bar-buffered {
-background-color: rgba(255, 255, 255, 0.5) !important;
-}
- 
 .controls { 
 display: grid; 
 grid-template-columns: 1fr 1fr; 
@@ -357,10 +309,6 @@ color: var(--dark);
 opacity: 0.7; 
 } 
 </style> 
-<!-- Shaka Player UI CSS -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/controls.min.css">
-<!-- Material Icons for better player controls -->
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head> 
 <body> 
 <div class="container"> 
@@ -370,9 +318,13 @@ opacity: 0.7;
  
 <div class="player-container"> 
 <div class="video-wrapper"> 
-<div id="video-container">
-  <video id="video" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png"></video>
-</div>
+<video id="my-video" class="video-js vjs-default-skin" controls preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup="{}">
+<source src="{{file_url}}" type="video/mp4">
+<p class="vjs-no-js">
+  To view this video please enable JavaScript, and consider upgrading to a
+  web browser that supports HTML5 video
+</p>
+</video>
 </div> 
 </div> 
  
@@ -427,76 +379,18 @@ KM Player
 © marvalzi | @Marvalzod | @drdoom 
 </div> 
 </div> 
-
-<!-- Shaka Player Library -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.ui.min.js"></script>
-
+ 
+<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
 <script> 
-document.addEventListener('DOMContentLoaded', () => {
-  // Initialize Shaka Player
-  const videoElement = document.getElementById('video');
-  const videoContainer = document.getElementById('video-container');
-  
-  // Install built-in polyfills to patch browser incompatibilities
-  shaka.polyfill.installAll();
-  
-  // Check if the browser supports Shaka Player
-  if (shaka.Player.isBrowserSupported()) {
-    // Initialize the player
-    const player = new shaka.Player(videoElement);
-    
-    // Initialize the UI
-    const ui = new shaka.ui.Overlay(player, videoContainer, videoElement);
-    
-    // Configure UI
-    const config = {
-      addBigPlayButton: true,
-      controlPanelElements: [
-        'play_pause', 'time_and_duration', 'spacer', 'mute', 'volume', 
-        'fullscreen', 'overflow_menu'
-      ],
-      overflowMenuButtons: [
-        'quality', 'playback_rate', 'captions', 'language'
-      ]
-    };
-    ui.configure(config);
-    
-    // Try to load a manifest
-    const currentUrl = window.location.href;
-    const finalUrl = currentUrl.replace("/watch/", "/dl/");
-    
-    // Configure the player for audio tracks
-    player.configure({
-      preferredAudioLanguage: 'en',  // Default to English
-      preferredTextLanguage: 'en',   // Default captions to English
-      streaming: {
-        bufferingGoal: 60,           // Buffer up to 60 seconds
-        rebufferingGoal: 15,         // Have 15 seconds buffered before playback after buffering
-        bufferBehind: 30,            // Keep 30 seconds of content behind the playhead
-        ignoreTextStreamFailures: true, // Don't fail if text streams have issues
-        alwaysStreamText: true       // Always try to stream text tracks when available
-      }
-    });
-    
-    player.load(finalUrl).then(() => {
-      // This runs if the load succeeded
-      console.log('The video has now been loaded!');
-      
-      // Log available audio tracks
-      const tracks = player.getVariantTracks();
-      console.log('Available audio tracks:', tracks.filter(track => track.audioId));
-      
-    }).catch((error) => {
-      // This runs if the load failed
-      console.error('Error loading video:', error);
-    });
-    
-  } else {
-    // Show error if browser is not supported
-    console.error('Browser not supported for Shaka Player');
-    videoContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Your browser is not supported for this video player. Please try a different browser.</div>';
-  }
-});
+document.addEventListener('DOMContentLoaded', () => { 
+  const player = videojs('my-video', {
+    responsive: true,
+    fluid: true,
+    controls: true,
+    autoplay: false,
+    preload: 'auto'
+  });
+}); 
  
 const currentUrl = window.location.href; 
 const finalUrl = currentUrl.replace("/watch/", "/dl/"); 

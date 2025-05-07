@@ -1,415 +1,534 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta property="og:image" content="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/live.png">
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MARVAL ZO | {{file_name}}</title>
-<link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon">
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-<style>
-:root {
---primary: #FF3366;
---secondary: #33CCFF;
---accent1: #FFCC00;
---accent2: #66FF99;
---dark: #111111;
---light: #F5F5F5;
---shadow-offset: 4px;
-}
+<!DOCTYPE html> 
+<html lang="en"> 
+<head> 
+<meta charset="UTF-8"> 
+<meta property="og:image" content="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/live.png"> 
+<meta http-equiv="X-UA-Compatible" content="IE=edge"> 
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
+<title>MARVAL ZO | {{file_name}}</title> 
+<link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon"> 
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
+<style> 
+:root { 
+--primary: #FF3366; 
+--secondary: #33CCFF; 
+--accent1: #FFCC00; 
+--accent2: #66FF99; 
+--dark: #111111; 
+--light: #F5F5F5; 
+--shadow-offset: 4px; 
+} 
+ 
+* { 
+margin: 0; 
+padding: 0; 
+box-sizing: border-box; 
+} 
+ 
+body { 
+font-family: 'Space Grotesk', sans-serif; 
+background-color: #f0f0f0; 
+background-image: 
+radial-gradient(var(--accent1) 2px, transparent 2px), 
+radial-gradient(var(--secondary) 2px, transparent 2px); 
+background-size: 30px 30px; 
+background-position: 0 0, 15px 15px; 
+color: var(--dark); 
+padding: 20px 10px; 
+} 
+ 
+.container { 
+max-width: 1000px; 
+margin: 0 auto; 
+padding: 15px; 
+} 
+ 
+header { 
+margin-bottom: 20px; 
+position: relative; 
+} 
+ 
+h1 { 
+font-family: 'Unbounded', cursive; 
+font-size: 2rem; 
+font-weight: 900; 
+text-transform: uppercase; 
+color: var(--dark); 
+background-color: var(--accent1); 
+padding: 12px 20px; 
+border: 3px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+display: inline-block; 
+transform: rotate(-1deg); 
+margin-bottom: 20px; 
+max-width: 100%; 
+overflow: hidden; 
+text-overflow: ellipsis; 
+white-space: nowrap; 
+} 
+ 
+.player-container { 
+margin-bottom: 25px; 
+border: 5px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+background-color: var(--secondary); 
+padding: 10px; 
+position: relative; 
+overflow: hidden; 
+} 
+ 
+.video-wrapper { 
+position: relative; 
+width: 100%; 
+background-color: #000; 
+border: 3px solid var(--dark); 
+} 
 
-* {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-}
-
-body {
-font-family: 'Space Grotesk', sans-serif;
-background-color: #f0f0f0;
-background-image:
-radial-gradient(var(--accent1) 2px, transparent 2px),
-radial-gradient(var(--secondary) 2px, transparent 2px);
-background-size: 30px 30px;
-background-position: 0 0, 15px 15px;
-color: var(--dark);
-padding: 20px 10px;
-}
-
-.container {
-max-width: 1000px;
-margin: 0 auto;
-padding: 15px;
-}
-
-header {
-margin-bottom: 20px;
-position: relative;
-}
-
-h1 {
-font-family: 'Unbounded', cursive;
-font-size: 2rem;
-font-weight: 900;
-text-transform: uppercase;
-color: var(--dark);
-background-color: var(--accent1);
-padding: 12px 20px;
-border: 3px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-display: inline-block;
-transform: rotate(-1deg);
-margin-bottom: 20px;
-max-width: 100%;
-overflow: hidden;
-text-overflow: ellipsis;
-white-space: nowrap;
-}
-
-.player-container {
-margin-bottom: 25px;
-border: 5px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-background-color: var(--secondary);
-padding: 10px;
-position: relative;
-overflow: hidden;
-}
-
-.video-wrapper {
-position: relative;
+/* Video player styling */
+#video-container {
 width: 100%;
+max-height: 75vh;
 background-color: #000;
-border: 3px solid var(--dark);
+position: relative;
 }
 
-.plyr {
+#video {
 width: 100%;
+height: 100%;
 max-height: 75vh;
 }
 
-/* Custom player styling */
-.plyr--video {
-border-radius: 0;
+/* Custom control styling - simplified */
+.shaka-controls-container {
+font-family: 'Space Grotesk', sans-serif !important;
 }
 
-.plyr__control--overlaid {
-background: var(--primary);
-border: 2px solid var(--dark);
-box-shadow: 3px 3px 0 var(--dark);
+.shaka-controls-button-panel > button {
+background-color: transparent !important;
 }
 
-.plyr__control--overlaid:hover {
-background: var(--accent1);
-transform: scale(1.1);
+.shaka-controls-button-panel > button:hover {
+background-color: rgba(255, 51, 102, 0.5) !important;
 }
 
-.plyr--full-ui input[type=range] {
-color: var(--primary);
+/* Make volume icon visible */
+.shaka-mute-button, .shaka-volume-bar-container {
+opacity: 1 !important;
+visibility: visible !important;
 }
 
-.plyr__control.plyr__tab-focus,
-.plyr__control:hover,
-.plyr__control[aria-expanded=true] {
-background: var(--accent1);
+/* Audio language selection styling */
+.shaka-audio-languages {
+  color: white !important;
 }
 
-.controls {
-display: grid;
-grid-template-columns: 1fr 1fr;
-gap: 15px;
-margin-bottom: 20px;
+.shaka-audio-languages .shaka-selected {
+  color: #FF3366 !important;
+  font-weight: bold !important;
 }
 
-.btn {
-font-family: 'Unbounded', cursive;
-font-weight: 700;
-font-size: 1rem;
-padding: 15px 20px;
-border: 3px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-background-color: white;
-cursor: pointer;
-transition: all 0.2s ease;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 10px;
-text-transform: uppercase;
+/* Make language menu items more visible */
+.shaka-overflow-menu button span {
+  color: white !important;
+  font-family: 'Space Grotesk', sans-serif !important;
 }
 
-.btn:active {
-box-shadow: 1px 1px 0 var(--dark);
-transform: translate(3px, 3px);
+/* Highlight the currently selected language */
+.shaka-overflow-menu button[aria-selected="true"] span {
+  color: #FF3366 !important;
+  font-weight: bold !important;
 }
 
-.download {
-background-color: var(--accent2);
+/* Lighter menu background */
+.shaka-overflow-menu, .shaka-settings-menu {
+background-color: rgba(40, 40, 40, 0.9) !important;
 }
 
-.copy-link {
-background-color: var(--secondary);
+.shaka-overflow-button:hover, .shaka-back-to-overflow-button:hover {
+background-color: rgba(255, 51, 102, 0.5) !important;
 }
 
-.player-options {
-display: grid;
-grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-gap: 15px;
-margin-bottom: 30px;
+.shaka-overflow-menu-button {
+color: white !important;
+font-family: 'Space Grotesk', sans-serif !important;
 }
 
-.player-btn {
-font-family: 'Space Grotesk', sans-serif;
-font-weight: 700;
-font-size: 0.9rem;
-padding: 12px 15px;
-border: 3px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-cursor: pointer;
-transition: all 0.2s ease;
-display: flex;
-align-items: center;
-justify-content: center;
-gap: 8px;
-background-color: white;
+.shaka-volume-bar-container {
+background-color: rgba(255, 255, 255, 0.4) !important;
 }
 
-.player-btn:nth-child(1) {
-background-color: #fb7e01;
+.shaka-volume-bar {
+background-color: #FF3366 !important;
 }
 
-.player-btn:nth-child(2) {
-background-color: #7EB5FF;
+.shaka-seek-bar-container {
+background-color: rgba(255, 255, 255, 0.3) !important;
+height: 5px !important;
 }
 
-.player-btn:nth-child(3) {
-background-color: #ffcc66;
+.shaka-seek-bar-played {
+background-color: #FF3366 !important;
 }
 
-.player-btn:nth-child(4) {
-background-color: #ff99cc;
+.shaka-seek-bar-buffered {
+background-color: rgba(255, 255, 255, 0.5) !important;
 }
-
-.player-btn:nth-child(5) {
-background-color: #66ccff;
-}
-
-.player-btn:active {
-box-shadow: 1px 1px 0 var(--dark);
-transform: translate(3px, 3px);
-}
-
-.player-logo {
-width: 24px;
-height: 24px;
-object-fit: contain;
-border-radius: 0;
-}
-
-.social-links {
-display: flex;
-justify-content: center;
-gap: 20px;
-margin-top: 20px;
-padding: 20px;
-background-color: var(--primary);
-border: 3px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-}
-
-.social-links a {
-display: flex;
-align-items: center;
-justify-content: center;
-width: 50px;
-height: 50px;
-background-color: white;
-border: 3px solid var(--dark);
-border-radius: 10px;
-box-shadow: 3px 3px 0 var(--dark);
-transition: all 0.2s ease;
-}
-
-.social-links a:hover {
-transform: translateY(-5px);
-}
-
-.social-links a:active {
-box-shadow: 1px 1px 0 var(--dark);
-transform: translate(2px, 2px);
-}
-
-.social-links img {
-width: 30px;
-height: 30px;
-object-fit: contain;
-}
-
-.feedback {
-position: fixed;
-bottom: 20px;
-left: 50%;
-transform: translateX(-50%);
-background-color: var(--accent1);
-color: var(--dark);
-padding: 15px 25px;
-border: 3px solid var(--dark);
-box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
-font-family: 'Unbounded', cursive;
-font-weight: 700;
-border-radius: 0;
-z-index: 1000;
-animation: popIn 0.3s ease-out;
-}
-
-@keyframes popIn {
-0% { transform: translateX(-50%) scale(0.8); opacity: 0; }
-70% { transform: translateX(-50%) scale(1.1); }
-100% { transform: translateX(-50%) scale(1); opacity: 1; }
-}
-
-@media (max-width: 768px) {
-h1 {
-font-size: 1.5rem;
-padding: 10px 15px;
-}
-
-.controls {
-grid-template-columns: 1fr;
-}
-
-.player-options {
-grid-template-columns: 1fr 1fr;
-}
-
-.social-links {
-flex-wrap: wrap;
-}
-}
-
-.copyright {
-text-align: center;
-margin-top: 20px;
-font-size: 0.8rem;
-font-weight: 500;
-color: var(--dark);
-opacity: 0.7;
-}
-</style>
-</head>
-<body>
-<div class="container">
-<header>
-<h1 id="file-name">{{file_name}}</h1>
-</header>
-
-<div class="player-container">
-<div class="video-wrapper">
-<video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
-<source src="{{file_url}}" type="video/mp4">
-Your browser does not support the video tag.
-</video>
+ 
+.controls { 
+display: grid; 
+grid-template-columns: 1fr 1fr; 
+gap: 15px; 
+margin-bottom: 20px; 
+} 
+ 
+.btn { 
+font-family: 'Unbounded', cursive; 
+font-weight: 700; 
+font-size: 1rem; 
+padding: 15px 20px; 
+border: 3px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+background-color: white; 
+cursor: pointer; 
+transition: all 0.2s ease; 
+display: flex; 
+align-items: center; 
+justify-content: center; 
+gap: 10px; 
+text-transform: uppercase; 
+} 
+ 
+.btn:active { 
+box-shadow: 1px 1px 0 var(--dark); 
+transform: translate(3px, 3px); 
+} 
+ 
+.download { 
+background-color: var(--accent2); 
+} 
+ 
+.copy-link { 
+background-color: var(--secondary); 
+} 
+ 
+.player-options { 
+display: grid; 
+grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+gap: 15px; 
+margin-bottom: 30px; 
+} 
+ 
+.player-btn { 
+font-family: 'Space Grotesk', sans-serif; 
+font-weight: 700; 
+font-size: 0.9rem; 
+padding: 12px 15px; 
+border: 3px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+cursor: pointer; 
+transition: all 0.2s ease; 
+display: flex; 
+align-items: center; 
+justify-content: center; 
+gap: 8px; 
+background-color: white; 
+} 
+ 
+.player-btn:nth-child(1) { 
+background-color: #fb7e01; 
+} 
+ 
+.player-btn:nth-child(2) { 
+background-color: #7EB5FF; 
+} 
+ 
+.player-btn:nth-child(3) { 
+background-color: #ffcc66; 
+} 
+ 
+.player-btn:nth-child(4) { 
+background-color: #ff99cc; 
+} 
+ 
+.player-btn:nth-child(5) { 
+background-color: #66ccff; 
+} 
+ 
+.player-btn:active { 
+box-shadow: 1px 1px 0 var(--dark); 
+transform: translate(3px, 3px); 
+} 
+ 
+.player-logo { 
+width: 24px; 
+height: 24px; 
+object-fit: contain; 
+border-radius: 0; 
+} 
+ 
+.social-links { 
+display: flex; 
+justify-content: center; 
+gap: 20px; 
+margin-top: 20px; 
+padding: 20px; 
+background-color: var(--primary); 
+border: 3px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+} 
+ 
+.social-links a { 
+display: flex; 
+align-items: center; 
+justify-content: center; 
+width: 50px; 
+height: 50px; 
+background-color: white; 
+border: 3px solid var(--dark); 
+border-radius: 10px; 
+box-shadow: 3px 3px 0 var(--dark); 
+transition: all 0.2s ease; 
+} 
+ 
+.social-links a:hover { 
+transform: translateY(-5px); 
+} 
+ 
+.social-links a:active { 
+box-shadow: 1px 1px 0 var(--dark); 
+transform: translate(2px, 2px); 
+} 
+ 
+.social-links img { 
+width: 30px; 
+height: 30px; 
+object-fit: contain; 
+} 
+ 
+.feedback { 
+position: fixed; 
+bottom: 20px; 
+left: 50%; 
+transform: translateX(-50%); 
+background-color: var(--accent1); 
+color: var(--dark); 
+padding: 15px 25px; 
+border: 3px solid var(--dark); 
+box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark); 
+font-family: 'Unbounded', cursive; 
+font-weight: 700; 
+border-radius: 0; 
+z-index: 1000; 
+animation: popIn 0.3s ease-out; 
+} 
+ 
+@keyframes popIn { 
+0% { transform: translateX(-50%) scale(0.8); opacity: 0; } 
+70% { transform: translateX(-50%) scale(1.1); } 
+100% { transform: translateX(-50%) scale(1); opacity: 1; } 
+} 
+ 
+@media (max-width: 768px) { 
+h1 { 
+font-size: 1.5rem; 
+padding: 10px 15px; 
+} 
+ 
+.controls { 
+grid-template-columns: 1fr; 
+} 
+ 
+.player-options { 
+grid-template-columns: 1fr 1fr; 
+} 
+ 
+.social-links { 
+flex-wrap: wrap; 
+} 
+} 
+ 
+.copyright { 
+text-align: center; 
+margin-top: 20px; 
+font-size: 0.8rem; 
+font-weight: 500; 
+color: var(--dark); 
+opacity: 0.7; 
+} 
+</style> 
+<!-- Shaka Player UI CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/controls.min.css">
+<!-- Material Icons for better player controls -->
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head> 
+<body> 
+<div class="container"> 
+<header> 
+<h1 id="file-name">{{file_name}}</h1> 
+</header> 
+ 
+<div class="player-container"> 
+<div class="video-wrapper"> 
+<div id="video-container">
+  <video id="video" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png"></video>
 </div>
-</div>
+</div> 
+</div> 
+ 
+<div class="controls"> 
+<button class="btn download" onclick="download()"> 
+<i class="fas fa-cloud-download-alt"></i> Download Now 
+</button> 
+<button class="btn copy-link" onclick="copyLink()"> 
+<i class="fas fa-link"></i> Copy Direct Link 
+</button> 
+</div> 
+ 
+<div class="player-options"> 
+<button class="player-btn" onclick="playOnline('vlc')"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/vlc.png" alt="VLC Mobile" class="player-logo"> 
+VLC Mobile 
+</button> 
+<button class="player-btn" onclick="playOnline('mx')"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/mx.png" alt="MX Player" class="player-logo"> 
+MX Player 
+</button> 
+<button class="player-btn" onclick="playOnline('np')"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/nPlayer.webp" alt="nPlayer" class="player-logo"> 
+nPlayer 
+</button> 
+<button class="player-btn" onclick="playOnline('sp')"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/splayer.webp" alt="S Player" class="player-logo"> 
+S Player 
+</button> 
+<button class="player-btn" onclick="playOnline('km')"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/km.webp" alt="KM Player" class="player-logo"> 
+KM Player 
+</button> 
+</div> 
+ 
+<div class="social-links"> 
+<a href="http://youtube.com/@avbotx" aria-label="YouTube"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/youtube.png" alt="YouTube"> 
+</a> 
+<a href="http://GitHub.com/Botsthe" aria-label="GitHub"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/github.png" alt="GitHub"> 
+</a> 
+<a href="http://t.me/BOT_OWNER26" aria-label="Telegram"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/telegram.png" alt="Telegram"> 
+</a> 
+<a href="https://www.instagram.com/aman_developerr" aria-label="Instagram"> 
+<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/instagram.png" alt="Instagram"> 
+</a> 
+</div> 
+ 
+<div class="copyright"> 
+© marvalzi | @Marvalzod | @drdoom 
+</div> 
+</div> 
 
-<div class="controls">
-<button class="btn download" onclick="download()">
-<i class="fas fa-cloud-download-alt"></i> Download Now
-</button>
-<button class="btn copy-link" onclick="copyLink()">
-<i class="fas fa-link"></i> Copy Direct Link
-</button>
-</div>
+<!-- Shaka Player Library -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.ui.min.js"></script>
 
-<div class="player-options">
-<button class="player-btn" onclick="playOnline('vlc')">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/vlc.png" alt="VLC Mobile" class="player-logo">
-VLC Mobile
-</button>
-<button class="player-btn" onclick="playOnline('mx')">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/mx.png" alt="MX Player" class="player-logo">
-MX Player
-</button>
-<button class="player-btn" onclick="playOnline('np')">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/nPlayer.webp" alt="nPlayer" class="player-logo">
-nPlayer
-</button>
-<button class="player-btn" onclick="playOnline('sp')">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/splayer.webp" alt="S Player" class="player-logo">
-S Player
-</button>
-<button class="player-btn" onclick="playOnline('km')">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/km.webp" alt="KM Player" class="player-logo">
-KM Player
-</button>
-</div>
-
-<div class="social-links">
-<a href="http://youtube.com/@avbotx" aria-label="YouTube">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/youtube.png" alt="YouTube">
-</a>
-<a href="http://GitHub.com/Botsthe" aria-label="GitHub">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/github.png" alt="GitHub">
-</a>
-<a href="http://t.me/BOT_OWNER26" aria-label="Telegram">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/telegram.png" alt="Telegram">
-</a>
-<a href="https://www.instagram.com/aman_developerr" aria-label="Instagram">
-<img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/instagram.png" alt="Instagram">
-</a>
-</div>
-
-<div class="copyright">
-© marvalzi | @Marvalzod | @drdoom
-</div>
-</div>
-
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
-<script>
+<script> 
 document.addEventListener('DOMContentLoaded', () => {
-const videoElement = document.querySelector('.plyr');
-const player = new Plyr(videoElement, {
-controls: [
-'play-large', 'play', 'progress', 'current-time', 'mute',
-'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-]
+  // Initialize Shaka Player
+  const videoElement = document.getElementById('video');
+  const videoContainer = document.getElementById('video-container');
+  
+  // Install built-in polyfills to patch browser incompatibilities
+  shaka.polyfill.installAll();
+  
+  // Check if the browser supports Shaka Player
+  if (shaka.Player.isBrowserSupported()) {
+    // Initialize the player
+    const player = new shaka.Player(videoElement);
+    
+    // Initialize the UI
+    const ui = new shaka.ui.Overlay(player, videoContainer, videoElement);
+    
+    // Configure UI
+    const config = {
+      addBigPlayButton: true,
+      controlPanelElements: [
+        'play_pause', 'time_and_duration', 'spacer', 'mute', 'volume', 
+        'fullscreen', 'overflow_menu'
+      ],
+      overflowMenuButtons: [
+        'quality', 'playback_rate', 'captions', 'language'
+      ]
+    };
+    ui.configure(config);
+    
+    // Try to load a manifest
+    const currentUrl = window.location.href;
+    const finalUrl = currentUrl.replace("/watch/", "/dl/");
+    
+    // Configure the player for audio tracks
+    player.configure({
+      preferredAudioLanguage: 'en',  // Default to English
+      preferredTextLanguage: 'en',   // Default captions to English
+      streaming: {
+        bufferingGoal: 60,           // Buffer up to 60 seconds
+        rebufferingGoal: 15,         // Have 15 seconds buffered before playback after buffering
+        bufferBehind: 30,            // Keep 30 seconds of content behind the playhead
+        ignoreTextStreamFailures: true, // Don't fail if text streams have issues
+        alwaysStreamText: true       // Always try to stream text tracks when available
+      }
+    });
+    
+    player.load(finalUrl).then(() => {
+      // This runs if the load succeeded
+      console.log('The video has now been loaded!');
+      
+      // Log available audio tracks
+      const tracks = player.getVariantTracks();
+      console.log('Available audio tracks:', tracks.filter(track => track.audioId));
+      
+    }).catch((error) => {
+      // This runs if the load failed
+      console.error('Error loading video:', error);
+    });
+    
+  } else {
+    // Show error if browser is not supported
+    console.error('Browser not supported for Shaka Player');
+    videoContainer.innerHTML = '<div style="color: white; text-align: center; padding: 20px;">Your browser is not supported for this video player. Please try a different browser.</div>';
+  }
 });
-});
-
-const currentUrl = window.location.href;
-const finalUrl = currentUrl.replace("/watch/", "/dl/");
-
-function playOnline(player) {
-const playerUrls = {
-vlc: `vlc://${finalUrl}`,
-mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
-mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
-np: `nplayer-${finalUrl}`,
-sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
-};
-window.location.href = playerUrls[player] || finalUrl;
-}
-
-function download() {
-window.location.href = finalUrl;
-}
-
-function copyLink() {
-navigator.clipboard.writeText(finalUrl)
-.then(() => {
-const feedback = document.createElement('div');
-feedback.className = 'feedback';
-feedback.textContent = "📋 Link copied to clipboard!";
-feedback.setAttribute("role", "alert");
-document.body.appendChild(feedback);
-setTimeout(() => feedback.remove(), 3000);
-})
-.catch(err => console.error('Could not copy text: ', err));
-}
-</script>
-</body>
+ 
+const currentUrl = window.location.href; 
+const finalUrl = currentUrl.replace("/watch/", "/dl/"); 
+ 
+function playOnline(player) { 
+const playerUrls = { 
+vlc: `vlc://${finalUrl}`, 
+mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`, 
+mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`, 
+np: `nplayer-${finalUrl}`, 
+sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`, 
+km: `intent:${finalUrl}#Intent;package=com.kmplayer;end` 
+}; 
+window.location.href = playerUrls[player] || finalUrl; 
+} 
+ 
+function download() { 
+window.location.href = finalUrl; 
+} 
+ 
+function copyLink() { 
+navigator.clipboard.writeText(finalUrl) 
+.then(() => { 
+const feedback = document.createElement('div'); 
+feedback.className = 'feedback'; 
+feedback.textContent = "📋 Link copied to clipboard!"; 
+feedback.setAttribute("role", "alert"); 
+document.body.appendChild(feedback); 
+setTimeout(() => feedback.remove(), 3000); 
+}) 
+.catch(err => console.error('Could not copy text: ', err)); 
+} 
+</script> 
+</body> 
 </html>

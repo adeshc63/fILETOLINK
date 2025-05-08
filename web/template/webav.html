@@ -10,6 +10,7 @@
 <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.css" rel="stylesheet">
 <link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-mobile-ui/0.7.0/videojs-mobile-ui.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
 <style> 
@@ -94,11 +95,62 @@ width: 100% !important;
 height: 0 !important;
 padding-top: 56.25% !important; /* 16:9 Aspect Ratio */
 max-height: 75vh !important;
+overflow: hidden !important;
 }
 
 .vjs-fullscreen {
 padding-top: 0 !important;
 height: 100% !important;
+}
+
+/* Make the play button larger and centered */
+.vjs-big-play-button {
+font-size: 3em !important;
+line-height: 2em !important;
+height: 2em !important;
+width: 2em !important;
+border-radius: 50% !important;
+margin-left: -1em !important;
+margin-top: -1em !important;
+}
+
+/* Settings icon for mobile */
+.vjs-settings-icon {
+position: absolute;
+right: 15px;
+top: 15px;
+font-size: 24px;
+color: white;
+background: rgba(0,0,0,0.5);
+border-radius: 50%;
+padding: 8px;
+cursor: pointer;
+z-index: 100;
+}
+
+/* Make sure controls display properly on mobile */
+.video-js .vjs-control-bar {
+display: flex !important;
+opacity: 1 !important;
+visibility: visible !important;
+transition: visibility 0.1s, opacity 0.1s !important;
+}
+
+.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar {
+visibility: hidden !important;
+opacity: 0 !important;
+}
+
+/* Make sure mobile fullscreen works properly */
+.video-js.vjs-fullscreen {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+right: 0 !important;
+bottom: 0 !important;
+width: 100% !important;
+height: 100% !important;
+z-index: 9999 !important;
 }
 
 .video-js .vjs-big-play-button {
@@ -325,13 +377,16 @@ opacity: 0.7;
  
 <div class="player-container"> 
 <div class="video-wrapper"> 
-<video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup='{"controlBar": {"fullscreenToggle": true}}'>
+<video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls disablePictureInPicture controlsList="nodownload" playsinline webkit-playsinline preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup='{"controlBar": {"fullscreenToggle": true}}'>
 <source src="{{file_url}}" type="video/mp4" label="Auto">
 <p class="vjs-no-js">
   To view this video please enable JavaScript, and consider upgrading to a
   web browser that supports HTML5 video
 </p>
 </video>
+<div class="vjs-settings-icon" id="custom-settings-button" style="display: none;">
+  <i class="fas fa-cog"></i>
+</div>
 </div> 
 </div> 
  
@@ -390,6 +445,7 @@ KM Player
 <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-mobile-ui/0.7.0/videojs-mobile-ui.min.js"></script>
 <script> 
 document.addEventListener('DOMContentLoaded', () => { 
   // Initialize the player
@@ -399,6 +455,7 @@ document.addEventListener('DOMContentLoaded', () => {
     controls: true,
     autoplay: false,
     preload: 'auto',
+    playbackRates: [0.5, 1, 1.5, 2],
     controlBar: {
       children: [
         'playToggle',
@@ -408,22 +465,38 @@ document.addEventListener('DOMContentLoaded', () => {
         'durationDisplay',
         'progressControl',
         'liveDisplay',
-        'remainingTimeDisplay',
         'customControlSpacer',
         'playbackRateMenuButton',
         'chaptersButton',
         'descriptionsButton',
         'subsCapsButton',
         'audioTrackButton',
+        'qualitySelector',
         'fullscreenToggle'
       ]
     },
     html5: {
       vhs: {
-        overrideNative: true
+        overrideNative: true,
+        limitRenditionByPlayerDimensions: false
       },
       nativeAudioTracks: false,
-      nativeVideoTracks: false
+      nativeVideoTracks: false,
+      nativeTextTracks: false
+    }
+  });
+
+  // Add mobile UI for better mobile experience
+  player.mobileUi({
+    fullscreen: {
+      enterOnRotate: true,
+      exitOnRotate: true,
+      lockOnRotate: true
+    },
+    touchControls: {
+      seekSeconds: 10,
+      tapTimeout: 300,
+      disableOnEnd: false
     }
   });
   
@@ -434,9 +507,161 @@ document.addEventListener('DOMContentLoaded', () => {
   player.on('fullscreenchange', function() {
     if (player.isFullscreen()) {
       console.log('Entered fullscreen mode');
+      document.documentElement.style.setProperty('--plyr-video-controls-background', 'linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7))');
+      // Add orientationchange event for mobile
+      window.addEventListener('orientationchange', function() {
+        setTimeout(function() {
+          if (player.isFullscreen()) {
+            player.requestFullscreen();
+          }
+        }, 100);
+      });
     } else {
       console.log('Exited fullscreen mode');
+      document.documentElement.style.setProperty('--plyr-video-controls-background', 'rgba(0, 0, 0, 0.5)');
+      window.removeEventListener('orientationchange', function() {});
     }
+  });
+  
+  // Add settings button for mobile
+  const settingsButton = document.getElementById('custom-settings-button');
+  settingsButton.style.display = 'block';
+  settingsButton.addEventListener('click', function() {
+    // Create a simple settings menu
+    const menu = document.createElement('div');
+    menu.className = 'vjs-settings-menu';
+    menu.style.position = 'absolute';
+    menu.style.bottom = '60px';
+    menu.style.right = '10px';
+    menu.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
+    menu.style.padding = '10px';
+    menu.style.borderRadius = '5px';
+    menu.style.color = 'white';
+    menu.style.zIndex = '200';
+    
+    // Add audio track selector if available
+    if (player.audioTracks && player.audioTracks().length > 1) {
+      const audioTrackHeader = document.createElement('div');
+      audioTrackHeader.textContent = 'Audio Tracks';
+      audioTrackHeader.style.fontWeight = 'bold';
+      audioTrackHeader.style.marginBottom = '5px';
+      menu.appendChild(audioTrackHeader);
+      
+      const audioTracks = player.audioTracks();
+      for (let i = 0; i < audioTracks.length; i++) {
+        const track = audioTracks[i];
+        const trackItem = document.createElement('div');
+        trackItem.textContent = track.label || `Track ${i+1}`;
+        trackItem.style.padding = '5px';
+        trackItem.style.cursor = 'pointer';
+        trackItem.style.backgroundColor = track.enabled ? 'rgba(255, 51, 102, 0.5)' : 'transparent';
+        
+        trackItem.addEventListener('click', function() {
+          for (let j = 0; j < audioTracks.length; j++) {
+            audioTracks[j].enabled = (j === i);
+          }
+          menu.remove();
+        });
+        
+        menu.appendChild(trackItem);
+      }
+    }
+    
+    // Add quality selector if available
+    const qualityLevels = player.qualityLevels();
+    if (qualityLevels && qualityLevels.length > 1) {
+      const qualityHeader = document.createElement('div');
+      qualityHeader.textContent = 'Quality';
+      qualityHeader.style.fontWeight = 'bold';
+      qualityHeader.style.marginTop = '10px';
+      qualityHeader.style.marginBottom = '5px';
+      menu.appendChild(qualityHeader);
+      
+      const autoQuality = document.createElement('div');
+      autoQuality.textContent = 'Auto';
+      autoQuality.style.padding = '5px';
+      autoQuality.style.cursor = 'pointer';
+      autoQuality.style.backgroundColor = 'rgba(255, 51, 102, 0.5)';
+      
+      autoQuality.addEventListener('click', function() {
+        for (let i = 0; i < qualityLevels.length; i++) {
+          qualityLevels[i].enabled = true;
+        }
+        menu.remove();
+      });
+      
+      menu.appendChild(autoQuality);
+      
+      for (let i = 0; i < qualityLevels.length; i++) {
+        const quality = qualityLevels[i];
+        const qualityItem = document.createElement('div');
+        qualityItem.textContent = `${Math.round(quality.height)}p`;
+        qualityItem.style.padding = '5px';
+        qualityItem.style.cursor = 'pointer';
+        
+        qualityItem.addEventListener('click', function() {
+          for (let j = 0; j < qualityLevels.length; j++) {
+            qualityLevels[j].enabled = (j === i);
+          }
+          menu.remove();
+        });
+        
+        menu.appendChild(qualityItem);
+      }
+    }
+    
+    // Add close button
+    const closeButton = document.createElement('div');
+    closeButton.textContent = 'Close';
+    closeButton.style.padding = '5px';
+    closeButton.style.marginTop = '10px';
+    closeButton.style.textAlign = 'center';
+    closeButton.style.cursor = 'pointer';
+    closeButton.style.backgroundColor = 'rgba(255, 51, 102, 0.5)';
+    closeButton.style.borderRadius = '3px';
+    
+    closeButton.addEventListener('click', function() {
+      menu.remove();
+    });
+    
+    menu.appendChild(closeButton);
+    
+    document.querySelector('.video-wrapper').appendChild(menu);
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', function closeMenu(e) {
+      if (!menu.contains(e.target) && e.target !== settingsButton) {
+        menu.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+    });
+  });
+  
+  // Add double tap to seek
+  const videoElement = document.querySelector('.video-js');
+  let lastTap = 0;
+  let touchTimeout;
+  
+  videoElement.addEventListener('touchend', function(e) {
+    const currentTime = new Date().getTime();
+    const tapPosition = e.changedTouches[0].clientX;
+    const playerWidth = videoElement.offsetWidth;
+    
+    clearTimeout(touchTimeout);
+    
+    if (currentTime - lastTap < 300) {
+      // Double tap detected
+      if (tapPosition < playerWidth / 2) {
+        // Left side - rewind
+        player.currentTime(Math.max(0, player.currentTime() - 10));
+      } else {
+        // Right side - forward
+        player.currentTime(Math.min(player.duration(), player.currentTime() + 10));
+      }
+      e.preventDefault();
+    }
+    
+    lastTap = currentTime;
   });
   
   // Add quality levels if available in stream
@@ -481,11 +706,4 @@ const feedback = document.createElement('div');
 feedback.className = 'feedback'; 
 feedback.textContent = "📋 Link copied to clipboard!"; 
 feedback.setAttribute("role", "alert"); 
-document.body.appendChild(feedback); 
-setTimeout(() => feedback.remove(), 3000); 
-}) 
-.catch(err => console.error('Could not copy text: ', err)); 
-} 
-</script> 
-</body> 
-</html>
+document

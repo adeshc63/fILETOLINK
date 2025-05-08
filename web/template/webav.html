@@ -7,12 +7,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"> 
 <title>MARVAL ZO | {{file_name}}</title> 
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon"> 
-<link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
-<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.css" rel="stylesheet">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-mobile-ui/0.7.0/videojs-mobile-ui.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.compiled.js"></script>
 <style> 
 :root { 
 --primary: #FF3366; 
@@ -89,33 +86,66 @@ background-color: #000;
 border: 3px solid var(--dark); 
 } 
 
-/* VideoJS Custom Styling */
-.video-js {
+/* Shaka Player Custom Styling */
+#video-container {
+width: 100% !important;
+position: relative;
+}
+
+#video {
 width: 100% !important;
 height: 0 !important;
 padding-top: 56.25% !important; /* 16:9 Aspect Ratio */
 max-height: 75vh !important;
-overflow: hidden !important;
+background-color: #000;
 }
 
-.vjs-fullscreen {
-padding-top: 0 !important;
-height: 100% !important;
+.shaka-controls-container {
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
 }
 
-/* Make the play button larger and centered */
-.vjs-big-play-button {
+.shaka-big-play-button {
+position: absolute;
+left: 50%;
+top: 50%;
+transform: translate(-50%, -50%);
 font-size: 3em !important;
 line-height: 2em !important;
 height: 2em !important;
 width: 2em !important;
 border-radius: 50% !important;
-margin-left: -1em !important;
-margin-top: -1em !important;
+background-color: var(--primary);
+border: 2px solid var(--dark);
+box-shadow: 3px 3px 0 var(--dark);
+cursor: pointer;
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 100;
+color: white;
+transition: all 0.2s ease;
+}
+
+.shaka-big-play-button:hover {
+background-color: var(--accent1);
+transform: translate(-50%, -50%) scale(1.1);
+}
+
+/* Custom Shaka Controls Style */
+.shaka-controls-button-panel {
+padding: 10px;
+}
+
+.shaka-bottom-controls {
+padding: 8px;
+background: linear-gradient(transparent, rgba(0,0,0,0.7));
 }
 
 /* Settings icon for mobile */
-.vjs-settings-icon {
+#custom-settings-button {
 position: absolute;
 right: 15px;
 top: 15px;
@@ -128,62 +158,40 @@ cursor: pointer;
 z-index: 100;
 }
 
-/* Make sure controls display properly on mobile */
-.video-js .vjs-control-bar {
-display: flex !important;
-opacity: 1 !important;
-visibility: visible !important;
-transition: visibility 0.1s, opacity 0.1s !important;
+/* Custom settings menu */
+.shaka-settings-menu {
+position: absolute;
+bottom: 60px;
+right: 10px;
+background-color: rgba(0, 0, 0, 0.8);
+padding: 10px;
+border-radius: 5px;
+color: white;
+z-index: 200;
+display: none;
 }
 
-.vjs-has-started.vjs-user-inactive.vjs-playing .vjs-control-bar {
-visibility: hidden !important;
-opacity: 0 !important;
+.settings-header {
+font-weight: bold;
+margin-bottom: 5px;
 }
 
-/* Make sure mobile fullscreen works properly */
-.video-js.vjs-fullscreen {
-position: fixed !important;
-top: 0 !important;
-left: 0 !important;
-right: 0 !important;
-bottom: 0 !important;
-width: 100% !important;
-height: 100% !important;
-z-index: 9999 !important;
+.settings-item {
+padding: 5px;
+cursor: pointer;
 }
 
-.video-js .vjs-big-play-button {
-background-color: var(--primary);
-border: 2px solid var(--dark);
-box-shadow: 3px 3px 0 var(--dark);
-border-radius: 0;
-top: 50%;
-left: 50%;
-transform: translate(-50%, -50%);
-}
-
-.video-js .vjs-big-play-button:hover {
-background-color: var(--accent1);
-transform: translate(-50%, -50%) scale(1.1);
-}
-
-.video-js .vjs-control-bar {
-background-color: rgba(0, 0, 0, 0.7);
-}
-
-.video-js .vjs-play-progress,
-.video-js .vjs-volume-level {
-background-color: var(--primary);
-}
-
-.video-js .vjs-slider {
-background-color: rgba(255, 255, 255, 0.3);
-}
-
-.video-js .vjs-control:focus,
-.video-js .vjs-control:hover {
+.settings-item.active {
 background-color: rgba(255, 51, 102, 0.5);
+}
+
+.settings-close {
+padding: 5px;
+margin-top: 10px;
+text-align: center;
+cursor: pointer;
+background-color: rgba(255, 51, 102, 0.5);
+border-radius: 3px;
 }
 
 .controls { 
@@ -377,16 +385,16 @@ opacity: 0.7;
  
 <div class="player-container"> 
 <div class="video-wrapper"> 
-<video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls disablePictureInPicture controlsList="nodownload" playsinline webkit-playsinline preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup='{"controlBar": {"fullscreenToggle": true}}'>
-<source src="{{file_url}}" type="video/mp4" label="Auto">
-<p class="vjs-no-js">
-  To view this video please enable JavaScript, and consider upgrading to a
-  web browser that supports HTML5 video
-</p>
-</video>
-<div class="vjs-settings-icon" id="custom-settings-button" style="display: none;">
-  <i class="fas fa-cog"></i>
-</div>
+  <div id="video-container">
+    <video id="video" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" playsinline></video>
+    <div class="shaka-big-play-button" id="big-play-button">
+      <i class="fas fa-play"></i>
+    </div>
+    <div id="custom-settings-button">
+      <i class="fas fa-cog"></i>
+    </div>
+    <div class="shaka-settings-menu" id="settings-menu"></div>
+  </div>
 </div> 
 </div> 
  
@@ -442,242 +450,322 @@ KM Player
 </div> 
 </div> 
  
-<script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-mobile-ui/0.7.0/videojs-mobile-ui.min.js"></script>
 <script> 
 document.addEventListener('DOMContentLoaded', () => { 
+  // Initialize Shaka Player
+  const videoElement = document.getElementById('video');
+  const bigPlayButton = document.getElementById('big-play-button');
+  const videoUrl = '{{file_url}}';
+  
+  // Check if the browser supports the Shaka Player
+  if (!shaka.Player.isBrowserSupported()) {
+    console.error('Browser not supported for Shaka Player!');
+    alert('Your browser is not supported for video playback. Please try a modern browser like Chrome, Firefox, or Edge.');
+    return;
+  }
+  
+  // Create Shaka Player instance
+  const player = new shaka.Player(videoElement);
+  
+  // Configure Shaka Player
+  const config = {
+    streaming: {
+      bufferingGoal: 30,
+      rebufferingGoal: 2,
+      bufferBehind: 30,
+      retryParameters: {
+        maxAttempts: 5,
+        baseDelay: 1000,
+        backoffFactor: 2,
+        fuzzFactor: 0.5
+      }
+    },
+    manifest: {
+      retryParameters: {
+        maxAttempts: 5,
+        baseDelay: 1000,
+        backoffFactor: 2,
+        fuzzFactor: 0.5
+      }
+    },
+    abr: {
+      enabled: true,
+      defaultBandwidthEstimate: 1000000
+    },
+    preferredAudioLanguage: 'en',
+    preferredTextLanguage: 'en'
+  };
+  
+  player.configure(config);
+  
+  // Error handling
+  player.addEventListener('error', (event) => {
+    console.error('Error code', event.detail.code, 'object', event.detail);
+    showFeedback('Error loading video. Please try again.');
+  });
+  
+  // Setup UI and controls
+  const ui = setupShakaPlayerUI();
+  
+  // Load the video
+  function initPlayer() {
+    player.load(videoUrl).then(() => {
+      console.log('Video loaded successfully');
+      // Get available tracks
+      const tracks = player.getVariantTracks();
+      console.log('Available video tracks:', tracks);
+      
+      // Setup quality options in the settings menu
+      setupQualitySettings(tracks);
+      
+      // Handle audio tracks if available
+      const audioTracks = player.getAudioLanguagesAndRoles();
+      if (audioTracks && audioTracks.length > 1) {
+        setupAudioSettings(audioTracks);
+      }
+      
+    }).catch((error) => {
+      console.error('Error loading the video:', error);
+      showFeedback('Failed to load video. Please try again.');
+    });
+  }
+  
   // Initialize the player
-  const player = videojs('my-video', {
-    responsive: true,
-    fluid: true,
-    controls: true,
-    autoplay: false,
-    preload: 'auto',
-    playbackRates: [0.5, 1, 1.5, 2],
-    controlBar: {
-      children: [
-        'playToggle',
-        'volumePanel',
-        'currentTimeDisplay',
-        'timeDivider',
-        'durationDisplay',
-        'progressControl',
-        'liveDisplay',
-        'customControlSpacer',
-        'playbackRateMenuButton',
-        'chaptersButton',
-        'descriptionsButton',
-        'subsCapsButton',
-        'audioTrackButton',
-        'qualitySelector',
-        'fullscreenToggle'
-      ]
-    },
-    html5: {
-      vhs: {
-        overrideNative: true,
-        limitRenditionByPlayerDimensions: false
-      },
-      nativeAudioTracks: false,
-      nativeVideoTracks: false,
-      nativeTextTracks: false
-    }
-  });
-
-  // Add mobile UI for better mobile experience
-  player.mobileUi({
-    fullscreen: {
-      enterOnRotate: true,
-      exitOnRotate: true,
-      lockOnRotate: true
-    },
-    touchControls: {
-      seekSeconds: 10,
-      tapTimeout: 300,
-      disableOnEnd: false
-    }
-  });
+  initPlayer();
   
-  // Enable quality selector plugin
-  player.httpSourceSelector();
-  
-  // Force fullscreen button to work properly
-  player.on('fullscreenchange', function() {
-    if (player.isFullscreen()) {
-      console.log('Entered fullscreen mode');
-      document.documentElement.style.setProperty('--plyr-video-controls-background', 'linear-gradient(rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7))');
-      // Add orientationchange event for mobile
-      window.addEventListener('orientationchange', function() {
-        setTimeout(function() {
-          if (player.isFullscreen()) {
-            player.requestFullscreen();
-          }
-        }, 100);
-      });
-    } else {
-      console.log('Exited fullscreen mode');
-      document.documentElement.style.setProperty('--plyr-video-controls-background', 'rgba(0, 0, 0, 0.5)');
-      window.removeEventListener('orientationchange', function() {});
-    }
-  });
-  
-  // Add settings button for mobile
-  const settingsButton = document.getElementById('custom-settings-button');
-  settingsButton.style.display = 'block';
-  settingsButton.addEventListener('click', function() {
-    // Create a simple settings menu
-    const menu = document.createElement('div');
-    menu.className = 'vjs-settings-menu';
-    menu.style.position = 'absolute';
-    menu.style.bottom = '60px';
-    menu.style.right = '10px';
-    menu.style.backgroundColor = 'rgba(0, 0, 0, 0.8)';
-    menu.style.padding = '10px';
-    menu.style.borderRadius = '5px';
-    menu.style.color = 'white';
-    menu.style.zIndex = '200';
+  // Setup Shaka Player UI
+  function setupShakaPlayerUI() {
+    // Handle big play button click
+    bigPlayButton.addEventListener('click', () => {
+      videoElement.play();
+      bigPlayButton.style.display = 'none';
+    });
     
-    // Add audio track selector if available
-    if (player.audioTracks && player.audioTracks().length > 1) {
-      const audioTrackHeader = document.createElement('div');
-      audioTrackHeader.textContent = 'Audio Tracks';
-      audioTrackHeader.style.fontWeight = 'bold';
-      audioTrackHeader.style.marginBottom = '5px';
-      menu.appendChild(audioTrackHeader);
-      
-      const audioTracks = player.audioTracks();
-      for (let i = 0; i < audioTracks.length; i++) {
-        const track = audioTracks[i];
-        const trackItem = document.createElement('div');
-        trackItem.textContent = track.label || `Track ${i+1}`;
-        trackItem.style.padding = '5px';
-        trackItem.style.cursor = 'pointer';
-        trackItem.style.backgroundColor = track.enabled ? 'rgba(255, 51, 102, 0.5)' : 'transparent';
-        
-        trackItem.addEventListener('click', function() {
-          for (let j = 0; j < audioTracks.length; j++) {
-            audioTracks[j].enabled = (j === i);
-          }
-          menu.remove();
-        });
-        
-        menu.appendChild(trackItem);
+    // Hide big play button when play starts
+    videoElement.addEventListener('play', () => {
+      bigPlayButton.style.display = 'none';
+    });
+    
+    // Show big play button when paused
+    videoElement.addEventListener('pause', () => {
+      if (!videoElement.ended) {
+        bigPlayButton.style.display = 'flex';
       }
-    }
+    });
     
-    // Add quality selector if available
-    const qualityLevels = player.qualityLevels();
-    if (qualityLevels && qualityLevels.length > 1) {
-      const qualityHeader = document.createElement('div');
-      qualityHeader.textContent = 'Quality';
-      qualityHeader.style.fontWeight = 'bold';
-      qualityHeader.style.marginTop = '10px';
-      qualityHeader.style.marginBottom = '5px';
-      menu.appendChild(qualityHeader);
+    // Handle video end
+    videoElement.addEventListener('ended', () => {
+      bigPlayButton.style.display = 'flex';
+      bigPlayButton.innerHTML = '<i class="fas fa-redo"></i>';
+    });
+    
+    // Handle fullscreen
+    videoElement.addEventListener('dblclick', toggleFullScreen);
+    
+    // Handle touch events for mobile
+    setupMobileTouchEvents();
+    
+    // Setup settings button
+    const settingsButton = document.getElementById('custom-settings-button');
+    const settingsMenu = document.getElementById('settings-menu');
+    
+    settingsButton.addEventListener('click', () => {
+      if (settingsMenu.style.display === 'block') {
+        settingsMenu.style.display = 'none';
+      } else {
+        settingsMenu.style.display = 'block';
+        populateSettingsMenu();
+      }
+    });
+    
+    // Close settings menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (e.target !== settingsButton && !settingsMenu.contains(e.target) && settingsMenu.style.display === 'block') {
+        settingsMenu.style.display = 'none';
+      }
+    });
+    
+    return {
+      settingsMenu,
+      settingsButton
+    };
+  }
+  
+  // Setup mobile touch events for seeking
+  function setupMobileTouchEvents() {
+    let lastTap = 0;
+    let touchTimeout;
+    
+    videoElement.addEventListener('touchend', (e) => {
+      const currentTime = new Date().getTime();
+      const tapPosition = e.changedTouches[0].clientX;
+      const playerWidth = videoElement.offsetWidth;
       
-      const autoQuality = document.createElement('div');
-      autoQuality.textContent = 'Auto';
-      autoQuality.style.padding = '5px';
-      autoQuality.style.cursor = 'pointer';
-      autoQuality.style.backgroundColor = 'rgba(255, 51, 102, 0.5)';
+      clearTimeout(touchTimeout);
       
-      autoQuality.addEventListener('click', function() {
-        for (let i = 0; i < qualityLevels.length; i++) {
-          qualityLevels[i].enabled = true;
+      if (currentTime - lastTap < 300) {
+        // Double tap detected
+        if (tapPosition < playerWidth / 2) {
+          // Left side - rewind 10 seconds
+          videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+        } else {
+          // Right side - forward 10 seconds
+          videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
         }
-        menu.remove();
-      });
+        e.preventDefault();
+      }
       
-      menu.appendChild(autoQuality);
-      
-      for (let i = 0; i < qualityLevels.length; i++) {
-        const quality = qualityLevels[i];
-        const qualityItem = document.createElement('div');
-        qualityItem.textContent = `${Math.round(quality.height)}p`;
-        qualityItem.style.padding = '5px';
-        qualityItem.style.cursor = 'pointer';
-        
-        qualityItem.addEventListener('click', function() {
-          for (let j = 0; j < qualityLevels.length; j++) {
-            qualityLevels[j].enabled = (j === i);
-          }
-          menu.remove();
-        });
-        
-        menu.appendChild(qualityItem);
+      lastTap = currentTime;
+    });
+  }
+  
+  // Toggle fullscreen function
+  function toggleFullScreen() {
+    if (!document.fullscreenElement) {
+      if (videoElement.requestFullscreen) {
+        videoElement.requestFullscreen();
+      } else if (videoElement.webkitRequestFullscreen) {
+        videoElement.webkitRequestFullscreen();
+      } else if (videoElement.msRequestFullscreen) {
+        videoElement.msRequestFullscreen();
+      }
+    } else {
+      if (document.exitFullscreen) {
+        document.exitFullscreen();
+      } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+      } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
       }
     }
+  }
+  
+  // Populate the settings menu with quality options
+  function populateSettingsMenu() {
+    const settingsMenu = document.getElementById('settings-menu');
+    settingsMenu.innerHTML = ''; // Clear previous items
+    
+    // Add playback speed options
+    const speedHeader = document.createElement('div');
+    speedHeader.className = 'settings-header';
+    speedHeader.textContent = 'Playback Speed';
+    settingsMenu.appendChild(speedHeader);
+    
+    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
+    speeds.forEach(speed => {
+      const speedItem = document.createElement('div');
+      speedItem.className = 'settings-item';
+      speedItem.textContent = speed === 1 ? 'Normal' : `${speed}x`;
+      if (videoElement.playbackRate === speed) {
+        speedItem.classList.add('active');
+      }
+      
+      speedItem.addEventListener('click', () => {
+        videoElement.playbackRate = speed;
+        document.querySelectorAll('.settings-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        speedItem.classList.add('active');
+      });
+      
+      settingsMenu.appendChild(speedItem);
+    });
     
     // Add close button
     const closeButton = document.createElement('div');
+    closeButton.className = 'settings-close';
     closeButton.textContent = 'Close';
-    closeButton.style.padding = '5px';
-    closeButton.style.marginTop = '10px';
-    closeButton.style.textAlign = 'center';
-    closeButton.style.cursor = 'pointer';
-    closeButton.style.backgroundColor = 'rgba(255, 51, 102, 0.5)';
-    closeButton.style.borderRadius = '3px';
-    
-    closeButton.addEventListener('click', function() {
-      menu.remove();
+    closeButton.addEventListener('click', () => {
+      settingsMenu.style.display = 'none';
     });
     
-    menu.appendChild(closeButton);
+    settingsMenu.appendChild(closeButton);
+  }
+  
+  // Setup quality settings
+  function setupQualitySettings(tracks) {
+    if (!tracks || tracks.length <= 1) return;
     
-    document.querySelector('.video-wrapper').appendChild(menu);
+    // Sort tracks by height (resolution)
+    tracks.sort((a, b) => b.height - a.height);
     
-    // Close menu when clicking outside
-    document.addEventListener('click', function closeMenu(e) {
-      if (!menu.contains(e.target) && e.target !== settingsButton) {
-        menu.remove();
-        document.removeEventListener('click', closeMenu);
-      }
+    const settingsMenu = document.getElementById('settings-menu');
+    
+    // Add quality header to settings menu
+    const qualityHeader = document.createElement('div');
+    qualityHeader.className = 'settings-header';
+    qualityHeader.textContent = 'Quality';
+    settingsMenu.appendChild(qualityHeader);
+    
+    // Add auto quality option
+    const autoItem = document.createElement('div');
+    autoItem.className = 'settings-item active';
+    autoItem.textContent = 'Auto';
+    autoItem.addEventListener('click', () => {
+      player.configure({abr: {enabled: true}});
+      document.querySelectorAll('.quality-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      autoItem.classList.add('active');
     });
-  });
+    settingsMenu.appendChild(autoItem);
+    
+    // Add each quality option
+    tracks.forEach(track => {
+      const qualityItem = document.createElement('div');
+      qualityItem.className = 'settings-item quality-item';
+      qualityItem.textContent = `${track.height}p`;
+      
+      qualityItem.addEventListener('click', () => {
+        // Disable ABR for manual selection
+        player.configure({abr: {enabled: false}});
+        // Select this track
+        player.selectVariantTrack(track, true);
+        
+        // Update active state
+        document.querySelectorAll('.quality-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        autoItem.classList.remove('active');
+        qualityItem.classList.add('active');
+      });
+      
+      settingsMenu.appendChild(qualityItem);
+    });
+  }
   
-  // Add double tap to seek
-  const videoElement = document.querySelector('.video-js');
-  let lastTap = 0;
-  let touchTimeout;
-  
-  videoElement.addEventListener('touchend', function(e) {
-    const currentTime = new Date().getTime();
-    const tapPosition = e.changedTouches[0].clientX;
-    const playerWidth = videoElement.offsetWidth;
+  // Setup audio settings
+  function setupAudioSettings(audioTracks) {
+    if (!audioTracks || audioTracks.length <= 1) return;
     
-    clearTimeout(touchTimeout);
+    const settingsMenu = document.getElementById('settings-menu');
     
-    if (currentTime - lastTap < 300) {
-      // Double tap detected
-      if (tapPosition < playerWidth / 2) {
-        // Left side - rewind
-        player.currentTime(Math.max(0, player.currentTime() - 10));
-      } else {
-        // Right side - forward
-        player.currentTime(Math.min(player.duration(), player.currentTime() + 10));
-      }
-      e.preventDefault();
-    }
+    // Add audio header to settings menu
+    const audioHeader = document.createElement('div');
+    audioHeader.className = 'settings-header';
+    audioHeader.textContent = 'Audio';
+    settingsMenu.appendChild(audioHeader);
     
-    lastTap = currentTime;
-  });
-  
-  // Add quality levels if available in stream
-  player.on('loadedmetadata', function() {
-    const qualityLevels = player.qualityLevels();
-    
-    // Add audio tracks if available
-    if (player.audioTracks && player.audioTracks().length > 1) {
-      console.log('Audio tracks available:', player.audioTracks().length);
-    }
-    
-    // If HLS or DASH stream with multiple qualities
-    if (qualityLevels && qualityLevels.length > 1) {
-      console.log('Quality levels available:', qualityLevels.length);
-    }
-  });
+    // Add each audio track option
+    audioTracks.forEach((track, index) => {
+      const audioItem = document.createElement('div');
+      audioItem.className = 'settings-item audio-item';
+      audioItem.textContent = track.language || `Track ${index+1}`;
+      
+      audioItem.addEventListener('click', () => {
+        // Select this audio track
+        player.selectAudioLanguage(track.language);
+        
+        // Update active state
+        document.querySelectorAll('.audio-item').forEach(item => {
+          item.classList.remove('active');
+        });
+        audioItem.classList.add('active');
+      });
+      
+      settingsMenu.appendChild(audioItem);
+    });
+  }
 }); 
  
 const currentUrl = window.location.href; 
@@ -702,8 +790,33 @@ window.location.href = finalUrl;
 function copyLink() { 
 navigator.clipboard.writeText(finalUrl) 
 .then(() => { 
-const feedback = document.createElement('div'); 
-feedback.className = 'feedback'; 
-feedback.textContent = "📋 Link copied to clipboard!"; 
-feedback.setAttribute("role", "alert"); 
-document
+  showFeedback("📋 Link copied to clipboard!");
+}) 
+.catch(err => {
+  console.error('Failed to copy link: ', err);
+  showFeedback("❌ Failed to copy link. Please try again.");
+});
+}
+
+function showFeedback(message) {
+  // Remove any existing feedback
+  const existingFeedback = document.querySelector('.feedback');
+  if (existingFeedback) {
+    existingFeedback.remove();
+  }
+  
+  // Create and show new feedback
+  const feedback = document.createElement('div');
+  feedback.className = 'feedback';
+  feedback.textContent = message;
+  feedback.setAttribute("role", "alert");
+  document.body.appendChild(feedback);
+  
+  // Auto remove after 3 seconds
+  setTimeout(() => {
+    feedback.remove();
+  }, 3000);
+}
+</script> 
+</body> 
+</html>

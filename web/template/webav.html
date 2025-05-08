@@ -309,17 +309,10 @@ opacity: 0.7;
 <div class="player-container">
 <div class="video-wrapper">
 <video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
-<source src="{{file_url}}" type="video/mp4">
+<source src="{{file_url}}" type="application/x-mpegURL">
 Your browser does not support the video tag.
 </video>
-  <div style="margin-bottom: 10px;">
-  <label for="audio-select"><strong>🎧 Select Audio Track:</strong></label>
-  <select id="audio-select" onchange="switchAudioTrack(this.value)" style="margin-left: 10px;">
-    <option value="default">Default</option>
-    <option value="hindi">Hindi</option>
-    <option value="japanese">Japanese</option>
-  </select>
-</div>
+ 
 
 </div>
 </div>
@@ -421,28 +414,7 @@ setTimeout(() => feedback.remove(), 3000);
 }
 
 
-function switchAudioTrack(track) {
-  const player = document.querySelector('.plyr');
-  const currentTime = player.currentTime;
-  const isPaused = player.paused;
 
-  let audioSrc = '';
-  switch (track) {
-    case 'hindi':
-      audioSrc = '{{file_url_hindi}}'; // Replace with actual file with Hindi audio
-      break;
-    case 'japanese':
-      audioSrc = '{{file_url_japanese}}'; // Replace with actual file with Japanese audio
-      break;
-    default:
-      audioSrc = '{{file_url}}'; // Original file with default track
-  }
-
-  player.src = audioSrc;
-  player.load();
-  player.currentTime = currentTime;
-  if (!isPaused) player.play();
-}
   
 </script>
 </body>

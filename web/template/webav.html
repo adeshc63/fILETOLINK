@@ -9,7 +9,9 @@
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon"> 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.compiled.js"></script>
+<!-- Video.js CSS and JS -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video-js.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/7.20.3/video.min.js"></script>
 <style> 
 :root { 
 --primary: #FF3366; 
@@ -86,112 +88,44 @@ background-color: #000;
 border: 3px solid var(--dark); 
 } 
 
-/* Shaka Player Custom Styling */
-#video-container {
-width: 100% !important;
-position: relative;
-}
-
-#video {
+/* Video.js Custom Styling */
+.video-js {
 width: 100% !important;
 height: 0 !important;
 padding-top: 56.25% !important; /* 16:9 Aspect Ratio */
 max-height: 75vh !important;
-background-color: #000;
 }
 
-.shaka-controls-container {
-position: absolute;
-bottom: 0;
-left: 0;
-right: 0;
+.vjs-poster {
+background-size: cover;
 }
 
-.shaka-big-play-button {
-position: absolute;
+/* Custom Video.js theme */
+.video-js .vjs-big-play-button {
+font-size: 3em !important;
+line-height: 1.5em !important;
+height: 1.5em !important;
+width: 1.5em !important;
+border-radius: 50% !important;
+background-color: var(--primary) !important;
+border: 2px solid var(--dark) !important;
+box-shadow: 3px 3px 0 var(--dark) !important;
 left: 50%;
 top: 50%;
 transform: translate(-50%, -50%);
-font-size: 3em !important;
-line-height: 2em !important;
-height: 2em !important;
-width: 2em !important;
-border-radius: 50% !important;
+}
+
+.video-js:hover .vjs-big-play-button,
+.video-js .vjs-big-play-button:focus {
+background-color: var(--accent1) !important;
+}
+
+.video-js .vjs-control-bar {
+background-color: rgba(0, 0, 0, 0.7);
+}
+
+.video-js .vjs-play-progress {
 background-color: var(--primary);
-border: 2px solid var(--dark);
-box-shadow: 3px 3px 0 var(--dark);
-cursor: pointer;
-display: flex;
-align-items: center;
-justify-content: center;
-z-index: 100;
-color: white;
-transition: all 0.2s ease;
-}
-
-.shaka-big-play-button:hover {
-background-color: var(--accent1);
-transform: translate(-50%, -50%) scale(1.1);
-}
-
-/* Custom Shaka Controls Style */
-.shaka-controls-button-panel {
-padding: 10px;
-}
-
-.shaka-bottom-controls {
-padding: 8px;
-background: linear-gradient(transparent, rgba(0,0,0,0.7));
-}
-
-/* Settings icon for mobile */
-#custom-settings-button {
-position: absolute;
-right: 15px;
-top: 15px;
-font-size: 24px;
-color: white;
-background: rgba(0,0,0,0.5);
-border-radius: 50%;
-padding: 8px;
-cursor: pointer;
-z-index: 100;
-}
-
-/* Custom settings menu */
-.shaka-settings-menu {
-position: absolute;
-bottom: 60px;
-right: 10px;
-background-color: rgba(0, 0, 0, 0.8);
-padding: 10px;
-border-radius: 5px;
-color: white;
-z-index: 200;
-display: none;
-}
-
-.settings-header {
-font-weight: bold;
-margin-bottom: 5px;
-}
-
-.settings-item {
-padding: 5px;
-cursor: pointer;
-}
-
-.settings-item.active {
-background-color: rgba(255, 51, 102, 0.5);
-}
-
-.settings-close {
-padding: 5px;
-margin-top: 10px;
-text-align: center;
-cursor: pointer;
-background-color: rgba(255, 51, 102, 0.5);
-border-radius: 3px;
 }
 
 .controls { 
@@ -385,16 +319,24 @@ opacity: 0.7;
  
 <div class="player-container"> 
 <div class="video-wrapper"> 
-  <div id="video-container">
-    <video id="video" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" playsinline></video>
-    <div class="shaka-big-play-button" id="big-play-button">
-      <i class="fas fa-play"></i>
-    </div>
-    <div id="custom-settings-button">
-      <i class="fas fa-cog"></i>
-    </div>
-    <div class="shaka-settings-menu" id="settings-menu"></div>
-  </div>
+  <video 
+    id="my-video" 
+    class="video-js vjs-big-play-centered" 
+    controls 
+    preload="auto" 
+    poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" 
+    data-setup='{
+      "fluid": true,
+      "responsive": true,
+      "playbackRates": [0.5, 0.75, 1, 1.25, 1.5, 2]
+    }'
+  >
+    <source src="{{file_url}}" type="video/mp4">
+    <p class="vjs-no-js">
+      To view this video please enable JavaScript, and consider upgrading to a
+      web browser that supports HTML5 video
+    </p>
+  </video>
 </div> 
 </div> 
  
@@ -452,318 +394,70 @@ KM Player
  
 <script> 
 document.addEventListener('DOMContentLoaded', () => { 
-  // Initialize Shaka Player
-  const videoElement = document.getElementById('video');
-  const bigPlayButton = document.getElementById('big-play-button');
-  const videoUrl = '{{file_url}}';
-  
-  // Check if the browser supports the Shaka Player
-  if (!shaka.Player.isBrowserSupported()) {
-    console.error('Browser not supported for Shaka Player!');
-    alert('Your browser is not supported for video playback. Please try a modern browser like Chrome, Firefox, or Edge.');
-    return;
-  }
-  
-  // Create Shaka Player instance
-  const player = new shaka.Player(videoElement);
-  
-  // Configure Shaka Player
-  const config = {
-    streaming: {
-      bufferingGoal: 30,
-      rebufferingGoal: 2,
-      bufferBehind: 30,
-      retryParameters: {
-        maxAttempts: 5,
-        baseDelay: 1000,
-        backoffFactor: 2,
-        fuzzFactor: 0.5
-      }
-    },
-    manifest: {
-      retryParameters: {
-        maxAttempts: 5,
-        baseDelay: 1000,
-        backoffFactor: 2,
-        fuzzFactor: 0.5
-      }
-    },
-    abr: {
-      enabled: true,
-      defaultBandwidthEstimate: 1000000
-    },
-    preferredAudioLanguage: 'en',
-    preferredTextLanguage: 'en'
-  };
-  
-  player.configure(config);
-  
-  // Error handling
-  player.addEventListener('error', (event) => {
-    console.error('Error code', event.detail.code, 'object', event.detail);
-    showFeedback('Error loading video. Please try again.');
+  // Initialize Video.js player
+  const player = videojs('my-video', {
+    controls: true,
+    autoplay: false,
+    preload: 'auto',
+    playbackRates: [0.5, 0.75, 1, 1.25, 1.5, 2],
+    responsive: true,
+    fluid: true,
+    html5: {
+      nativeTextTracks: false,
+      hls: {
+        overrideNative: true
+      },
+      nativeAudioTracks: false,
+      nativeVideoTracks: false
+    }
   });
   
-  // Setup UI and controls
-  const ui = setupShakaPlayerUI();
+  // Set file name in the header
+  const urlParams = new URLSearchParams(window.location.search);
+  const fileName = urlParams.get('name') || 'Video File';
+  document.getElementById('file-name').textContent = fileName;
+  document.title = `MARVAL ZO | ${fileName}`;
   
-  // Load the video
-  function initPlayer() {
-    player.load(videoUrl).then(() => {
-      console.log('Video loaded successfully');
-      // Get available tracks
-      const tracks = player.getVariantTracks();
-      console.log('Available video tracks:', tracks);
-      
-      // Setup quality options in the settings menu
-      setupQualitySettings(tracks);
-      
-      // Handle audio tracks if available
-      const audioTracks = player.getAudioLanguagesAndRoles();
-      if (audioTracks && audioTracks.length > 1) {
-        setupAudioSettings(audioTracks);
-      }
-      
-    }).catch((error) => {
-      console.error('Error loading the video:', error);
-      showFeedback('Failed to load video. Please try again.');
-    });
-  }
+  // Handle player events
+  player.on('error', function() {
+    console.error('Video.js Error:', player.error());
+    showFeedback('Error loading video. Please try again or use an external player.');
+  });
   
-  // Initialize the player
-  initPlayer();
+  // Initialize quality selector if available
+  player.on('loadedmetadata', function() {
+    console.log('Video metadata loaded');
+    
+    // Additional setup can go here
+    // For example, adding quality selector if you want to add hls.js quality switching
+  });
   
-  // Setup Shaka Player UI
-  function setupShakaPlayerUI() {
-    // Handle big play button click
-    bigPlayButton.addEventListener('click', () => {
-      videoElement.play();
-      bigPlayButton.style.display = 'none';
-    });
-    
-    // Hide big play button when play starts
-    videoElement.addEventListener('play', () => {
-      bigPlayButton.style.display = 'none';
-    });
-    
-    // Show big play button when paused
-    videoElement.addEventListener('pause', () => {
-      if (!videoElement.ended) {
-        bigPlayButton.style.display = 'flex';
-      }
-    });
-    
-    // Handle video end
-    videoElement.addEventListener('ended', () => {
-      bigPlayButton.style.display = 'flex';
-      bigPlayButton.innerHTML = '<i class="fas fa-redo"></i>';
-    });
-    
-    // Handle fullscreen
-    videoElement.addEventListener('dblclick', toggleFullScreen);
-    
-    // Handle touch events for mobile
-    setupMobileTouchEvents();
-    
-    // Setup settings button
-    const settingsButton = document.getElementById('custom-settings-button');
-    const settingsMenu = document.getElementById('settings-menu');
-    
-    settingsButton.addEventListener('click', () => {
-      if (settingsMenu.style.display === 'block') {
-        settingsMenu.style.display = 'none';
-      } else {
-        settingsMenu.style.display = 'block';
-        populateSettingsMenu();
-      }
-    });
-    
-    // Close settings menu when clicking outside
-    document.addEventListener('click', (e) => {
-      if (e.target !== settingsButton && !settingsMenu.contains(e.target) && settingsMenu.style.display === 'block') {
-        settingsMenu.style.display = 'none';
-      }
-    });
-    
-    return {
-      settingsMenu,
-      settingsButton
-    };
-  }
+  // Mobile double tap to seek
+  setupMobileTouchEvents();
   
   // Setup mobile touch events for seeking
   function setupMobileTouchEvents() {
+    const videoElement = document.querySelector('video');
     let lastTap = 0;
-    let touchTimeout;
     
     videoElement.addEventListener('touchend', (e) => {
       const currentTime = new Date().getTime();
       const tapPosition = e.changedTouches[0].clientX;
       const playerWidth = videoElement.offsetWidth;
       
-      clearTimeout(touchTimeout);
-      
       if (currentTime - lastTap < 300) {
         // Double tap detected
         if (tapPosition < playerWidth / 2) {
           // Left side - rewind 10 seconds
-          videoElement.currentTime = Math.max(0, videoElement.currentTime - 10);
+          player.currentTime(Math.max(0, player.currentTime() - 10));
         } else {
           // Right side - forward 10 seconds
-          videoElement.currentTime = Math.min(videoElement.duration, videoElement.currentTime + 10);
+          player.currentTime(Math.min(player.duration(), player.currentTime() + 10));
         }
         e.preventDefault();
       }
       
       lastTap = currentTime;
-    });
-  }
-  
-  // Toggle fullscreen function
-  function toggleFullScreen() {
-    if (!document.fullscreenElement) {
-      if (videoElement.requestFullscreen) {
-        videoElement.requestFullscreen();
-      } else if (videoElement.webkitRequestFullscreen) {
-        videoElement.webkitRequestFullscreen();
-      } else if (videoElement.msRequestFullscreen) {
-        videoElement.msRequestFullscreen();
-      }
-    } else {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else if (document.msExitFullscreen) {
-        document.msExitFullscreen();
-      }
-    }
-  }
-  
-  // Populate the settings menu with quality options
-  function populateSettingsMenu() {
-    const settingsMenu = document.getElementById('settings-menu');
-    settingsMenu.innerHTML = ''; // Clear previous items
-    
-    // Add playback speed options
-    const speedHeader = document.createElement('div');
-    speedHeader.className = 'settings-header';
-    speedHeader.textContent = 'Playback Speed';
-    settingsMenu.appendChild(speedHeader);
-    
-    const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
-    speeds.forEach(speed => {
-      const speedItem = document.createElement('div');
-      speedItem.className = 'settings-item';
-      speedItem.textContent = speed === 1 ? 'Normal' : `${speed}x`;
-      if (videoElement.playbackRate === speed) {
-        speedItem.classList.add('active');
-      }
-      
-      speedItem.addEventListener('click', () => {
-        videoElement.playbackRate = speed;
-        document.querySelectorAll('.settings-item').forEach(item => {
-          item.classList.remove('active');
-        });
-        speedItem.classList.add('active');
-      });
-      
-      settingsMenu.appendChild(speedItem);
-    });
-    
-    // Add close button
-    const closeButton = document.createElement('div');
-    closeButton.className = 'settings-close';
-    closeButton.textContent = 'Close';
-    closeButton.addEventListener('click', () => {
-      settingsMenu.style.display = 'none';
-    });
-    
-    settingsMenu.appendChild(closeButton);
-  }
-  
-  // Setup quality settings
-  function setupQualitySettings(tracks) {
-    if (!tracks || tracks.length <= 1) return;
-    
-    // Sort tracks by height (resolution)
-    tracks.sort((a, b) => b.height - a.height);
-    
-    const settingsMenu = document.getElementById('settings-menu');
-    
-    // Add quality header to settings menu
-    const qualityHeader = document.createElement('div');
-    qualityHeader.className = 'settings-header';
-    qualityHeader.textContent = 'Quality';
-    settingsMenu.appendChild(qualityHeader);
-    
-    // Add auto quality option
-    const autoItem = document.createElement('div');
-    autoItem.className = 'settings-item active';
-    autoItem.textContent = 'Auto';
-    autoItem.addEventListener('click', () => {
-      player.configure({abr: {enabled: true}});
-      document.querySelectorAll('.quality-item').forEach(item => {
-        item.classList.remove('active');
-      });
-      autoItem.classList.add('active');
-    });
-    settingsMenu.appendChild(autoItem);
-    
-    // Add each quality option
-    tracks.forEach(track => {
-      const qualityItem = document.createElement('div');
-      qualityItem.className = 'settings-item quality-item';
-      qualityItem.textContent = `${track.height}p`;
-      
-      qualityItem.addEventListener('click', () => {
-        // Disable ABR for manual selection
-        player.configure({abr: {enabled: false}});
-        // Select this track
-        player.selectVariantTrack(track, true);
-        
-        // Update active state
-        document.querySelectorAll('.quality-item').forEach(item => {
-          item.classList.remove('active');
-        });
-        autoItem.classList.remove('active');
-        qualityItem.classList.add('active');
-      });
-      
-      settingsMenu.appendChild(qualityItem);
-    });
-  }
-  
-  // Setup audio settings
-  function setupAudioSettings(audioTracks) {
-    if (!audioTracks || audioTracks.length <= 1) return;
-    
-    const settingsMenu = document.getElementById('settings-menu');
-    
-    // Add audio header to settings menu
-    const audioHeader = document.createElement('div');
-    audioHeader.className = 'settings-header';
-    audioHeader.textContent = 'Audio';
-    settingsMenu.appendChild(audioHeader);
-    
-    // Add each audio track option
-    audioTracks.forEach((track, index) => {
-      const audioItem = document.createElement('div');
-      audioItem.className = 'settings-item audio-item';
-      audioItem.textContent = track.language || `Track ${index+1}`;
-      
-      audioItem.addEventListener('click', () => {
-        // Select this audio track
-        player.selectAudioLanguage(track.language);
-        
-        // Update active state
-        document.querySelectorAll('.audio-item').forEach(item => {
-          item.classList.remove('active');
-        });
-        audioItem.classList.add('active');
-      });
-      
-      settingsMenu.appendChild(audioItem);
     });
   }
 }); 

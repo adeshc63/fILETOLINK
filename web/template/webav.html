@@ -8,6 +8,8 @@
 <title>MARVAL ZO | {{file_name}}</title> 
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon"> 
 <link href="https://vjs.zencdn.net/7.20.3/video-js.css" rel="stylesheet" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.css" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet"> 
 <style> 
@@ -88,10 +90,15 @@ border: 3px solid var(--dark);
 
 /* VideoJS Custom Styling */
 .video-js {
-width: 100%;
-height: 0;
-padding-top: 56.25%; /* 16:9 Aspect Ratio */
-max-height: 75vh;
+width: 100% !important;
+height: 0 !important;
+padding-top: 56.25% !important; /* 16:9 Aspect Ratio */
+max-height: 75vh !important;
+}
+
+.vjs-fullscreen {
+padding-top: 0 !important;
+height: 100% !important;
 }
 
 .video-js .vjs-big-play-button {
@@ -318,8 +325,8 @@ opacity: 0.7;
  
 <div class="player-container"> 
 <div class="video-wrapper"> 
-<video id="my-video" class="video-js vjs-default-skin" controls preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup="{}">
-<source src="{{file_url}}" type="video/mp4">
+<video id="my-video" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" data-setup='{"controlBar": {"fullscreenToggle": true}}'>
+<source src="{{file_url}}" type="video/mp4" label="Auto">
 <p class="vjs-no-js">
   To view this video please enable JavaScript, and consider upgrading to a
   web browser that supports HTML5 video
@@ -381,14 +388,70 @@ KM Player
 </div> 
  
 <script src="https://vjs.zencdn.net/7.20.3/video.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-contrib-quality-levels/2.1.0/videojs-contrib-quality-levels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-http-source-selector/1.1.6/videojs-http-source-selector.min.js"></script>
 <script> 
 document.addEventListener('DOMContentLoaded', () => { 
+  // Initialize the player
   const player = videojs('my-video', {
     responsive: true,
     fluid: true,
     controls: true,
     autoplay: false,
-    preload: 'auto'
+    preload: 'auto',
+    controlBar: {
+      children: [
+        'playToggle',
+        'volumePanel',
+        'currentTimeDisplay',
+        'timeDivider',
+        'durationDisplay',
+        'progressControl',
+        'liveDisplay',
+        'remainingTimeDisplay',
+        'customControlSpacer',
+        'playbackRateMenuButton',
+        'chaptersButton',
+        'descriptionsButton',
+        'subsCapsButton',
+        'audioTrackButton',
+        'fullscreenToggle'
+      ]
+    },
+    html5: {
+      vhs: {
+        overrideNative: true
+      },
+      nativeAudioTracks: false,
+      nativeVideoTracks: false
+    }
+  });
+  
+  // Enable quality selector plugin
+  player.httpSourceSelector();
+  
+  // Force fullscreen button to work properly
+  player.on('fullscreenchange', function() {
+    if (player.isFullscreen()) {
+      console.log('Entered fullscreen mode');
+    } else {
+      console.log('Exited fullscreen mode');
+    }
+  });
+  
+  // Add quality levels if available in stream
+  player.on('loadedmetadata', function() {
+    const qualityLevels = player.qualityLevels();
+    
+    // Add audio tracks if available
+    if (player.audioTracks && player.audioTracks().length > 1) {
+      console.log('Audio tracks available:', player.audioTracks().length);
+    }
+    
+    // If HLS or DASH stream with multiple qualities
+    if (qualityLevels && qualityLevels.length > 1) {
+      console.log('Quality levels available:', qualityLevels.length);
+    }
   });
 }); 
  

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MARVAL ZO | {{file_name}}</title>
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/sampotts/plyr/dist/plyr.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.css">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
 <style>
@@ -86,10 +86,9 @@ h1 {
   border: 3px solid var(--dark);
 }
 
-.plyr {
+video {
   width: 100%;
-  height: 100%;
-  min-height: 450px;
+  display: block;
 }
 
 /* Custom player styling */
@@ -266,15 +265,38 @@ h1 {
   animation: popIn 0.3s ease-out;
 }
 
-/* Enhanced player controls */
-.quality-selector, .language-selector {
-  margin-bottom: 15px;
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+/* Dynamic control buttons */
+.player-controls-container {
+  background-color: white;
+  border: 3px solid var(--dark);
+  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+  padding: 15px;
+  margin-bottom: 20px;
 }
 
-.quality-btn, .language-btn {
+.control-section {
+  margin-bottom: 15px;
+}
+
+.control-section:last-child {
+  margin-bottom: 0;
+}
+
+.control-label {
+  font-family: 'Unbounded', cursive;
+  font-weight: 700;
+  margin-bottom: 8px;
+  display: block;
+  color: var(--dark);
+}
+
+.control-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.control-btn {
   font-family: 'Space Grotesk', sans-serif;
   font-weight: 700;
   padding: 8px 15px;
@@ -285,26 +307,20 @@ h1 {
   background-color: white;
 }
 
-.quality-btn.active, .language-btn.active {
+.control-btn.active {
   background-color: var(--accent1);
   transform: translate(1px, 1px);
   box-shadow: 2px 2px 0 var(--dark);
 }
 
-.option-label {
-  font-family: 'Unbounded', cursive;
-  font-weight: 700;
-  margin-bottom: 8px;
-  display: block;
-  color: var(--dark);
+.control-btn:hover {
+  background-color: var(--accent2);
 }
 
-.player-controls-container {
-  background-color: white;
-  border: 3px solid var(--dark);
-  box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);
+.player-loading {
+  text-align: center;
   padding: 15px;
-  margin-bottom: 20px;
+  font-weight: bold;
 }
 
 @keyframes popIn {
@@ -330,10 +346,6 @@ h1 {
   .social-links {
     flex-wrap: wrap;
   }
-  
-  .plyr {
-    min-height: 250px;
-  }
 }
 
 .copyright {
@@ -345,29 +357,25 @@ h1 {
   opacity: 0.7;
 }
 
-/* Fullscreen fix */
-.plyr--fullscreen-active {
-  height: 100%;
+/* Spinner for loading states */
+.spinner {
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: var(--primary);
+  animation: spin 1s ease-in-out infinite;
+  margin-right: 10px;
 }
 
-.plyr:-webkit-full-screen {
-  width: 100%;
-  height: 100%;
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }
 
-.plyr:-moz-full-screen {
-  width: 100%;
-  height: 100%;
-}
-
-.plyr:-ms-fullscreen {
-  width: 100%;
-  height: 100%;
-}
-
-.plyr:fullscreen {
-  width: 100%;
-  height: 100%;
+/* HLS.js specific styling */
+.fullscreen-enabled {
+  background: black;
 }
 </style>
 </head>
@@ -379,29 +387,39 @@ h1 {
 
   <div class="player-container">
     <div class="video-wrapper">
-      <video id="player" class="plyr" crossorigin playsinline controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
-        <source id="video-source" src="{{file_url}}" type="video/mp4" size="720">
-        <track kind="captions" label="English" srclang="en" src="#" default>
-        <track kind="captions" label="Hindi" srclang="hi" src="#">
+      <video id="player" controls crossorigin playsinline poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
+        <source id="video-source" src="{{file_url}}" type="video/mp4">
+        Your browser does not support the video tag.
       </video>
     </div>
   </div>
   
   <div class="player-controls-container">
-    <div class="quality-selector">
-      <span class="option-label">Video Quality:</span>
-      <button class="quality-btn active" data-quality="auto">Auto</button>
-      <button class="quality-btn" data-quality="1080">1080p HD</button>
-      <button class="quality-btn" data-quality="720">720p HD</button>
-      <button class="quality-btn" data-quality="480">480p</button>
-      <button class="quality-btn" data-quality="360">360p</button>
+    <div id="quality-control" class="control-section">
+      <span class="control-label">Video Quality:</span>
+      <div class="control-options" id="quality-options">
+        <div class="player-loading">
+          <div class="spinner"></div> Detecting available qualities...
+        </div>
+      </div>
     </div>
     
-    <div class="language-selector">
-      <span class="option-label">Audio Language:</span>
-      <button class="language-btn active" data-lang="default">Default</button>
-      <button class="language-btn" data-lang="english">English</button>
-      <button class="language-btn" data-lang="hindi">Hindi</button>
+    <div id="audio-control" class="control-section">
+      <span class="control-label">Audio Track:</span>
+      <div class="control-options" id="audio-options">
+        <div class="player-loading">
+          <div class="spinner"></div> Detecting available audio tracks...
+        </div>
+      </div>
+    </div>
+    
+    <div id="subtitle-control" class="control-section">
+      <span class="control-label">Subtitles:</span>
+      <div class="control-options" id="subtitle-options">
+        <div class="player-loading">
+          <div class="spinner"></div> Detecting available subtitles...
+        </div>
+      </div>
     </div>
   </div>
 
@@ -457,105 +475,381 @@ h1 {
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/gh/sampotts/plyr/dist/plyr.min.js"></script>
+<!-- Include HLS.js for adaptive streaming support -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.0/hls.min.js"></script>
+<!-- Include Plyr.js for a nicer player UI -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/plyr/3.7.8/plyr.min.js"></script>
+<!-- Include Shaka Player for more advanced streaming -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/shaka-player/4.3.6/shaka-player.compiled.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize player with enhanced controls
-  const player = new Plyr('#player', {
-    controls: [
-      'play-large', 'play', 'progress', 'current-time', 'duration',
-      'mute', 'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-    ],
-    settings: ['captions', 'quality', 'speed'],
-    fullscreen: { enabled: true, fallback: true, iosNative: true },
-    captions: { active: false, language: 'auto', update: true },
-    ratio: '16:9',
-    keyboard: { focused: true, global: true }
-  });
+  // Initialize variables
+  let player;
+  let shakaPlayer;
+  let hls;
+  let videoElement = document.getElementById('player');
+  let videoSource = document.getElementById('video-source');
+  let videoUrl = videoSource.src;
+  let currentQuality = '';
+  let currentAudioTrack = '';
+  let currentSubtitle = '';
   
-  // Fix fullscreen issue
-  document.addEventListener('fullscreenchange', adjustFullscreen);
-  document.addEventListener('webkitfullscreenchange', adjustFullscreen);
-  document.addEventListener('mozfullscreenchange', adjustFullscreen);
-  document.addEventListener('MSFullscreenChange', adjustFullscreen);
+  // Initialize player with appropriate tech based on source
+  initializePlayer();
   
-  function adjustFullscreen() {
-    const videoElement = document.querySelector('.plyr');
-    if (document.fullscreenElement) {
-      videoElement.style.height = '100%';
-      videoElement.style.maxHeight = '100%';
-    } else {
-      videoElement.style.height = '';
-      videoElement.style.maxHeight = '';
+  function initializePlayer() {
+    // Check if it's potentially an HLS stream (m3u8)
+    if (videoUrl.includes('.m3u8')) {
+      initializeHLSPlayer();
+    } 
+    // Check if it's potentially a DASH stream (mpd)
+    else if (videoUrl.includes('.mpd')) {
+      initializeShakaPlayer();
+    } 
+    // Otherwise, use standard player for MP4
+    else {
+      initializeStandardPlayer();
     }
   }
   
-  // Video quality selector
-  const qualityButtons = document.querySelectorAll('.quality-btn');
-  qualityButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      qualityButtons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
-      
-      const quality = this.getAttribute('data-quality');
-      // In a real implementation, this would switch video sources
-      if (quality !== 'auto') {
-        showFeedback(`Quality changed to ${quality}`);
-      } else {
-        showFeedback('Auto quality enabled');
-      }
+  function initializeStandardPlayer() {
+    // Create array of video qualities for demonstration
+    // In a real implementation, you would detect these from the server
+    const qualities = [
+      { name: '1080p', url: videoUrl.replace('.mp4', '_1080p.mp4'), selected: false },
+      { name: '720p', url: videoUrl, selected: true },
+      { name: '480p', url: videoUrl.replace('.mp4', '_480p.mp4'), selected: false },
+      { name: '360p', url: videoUrl.replace('.mp4', '_360p.mp4'), selected: false }
+    ];
+    
+    // Create array of audio tracks for demonstration
+    // In a real implementation, you would detect these from the video
+    const audioTracks = [
+      { name: 'English', language: 'en', selected: true },
+      { name: 'Hindi', language: 'hi', selected: false },
+      { name: 'Original', language: 'original', selected: false }
+    ];
+    
+    // Create array of subtitles for demonstration
+    const subtitles = [
+      { name: 'Off', language: 'off', selected: true },
+      { name: 'English', language: 'en', selected: false },
+      { name: 'Hindi', language: 'hi', selected: false }
+    ];
+    
+    // Initialize standard player
+    player = new Plyr(videoElement, {
+      controls: [
+        'play-large', 'play', 'progress', 'current-time', 'duration',
+        'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'
+      ],
+      fullscreen: { enabled: true, fallback: true, iosNative: true }
     });
-  });
+    
+    // Populate quality options
+    populateQualityOptions(qualities);
+    
+    // Populate audio options
+    populateAudioOptions(audioTracks);
+    
+    // Populate subtitle options
+    populateSubtitleOptions(subtitles);
+    
+    // Listen for play event to check audio/subtitle tracks
+    player.on('ready', () => {
+      // Attempt to detect actual audio tracks if available
+      detectAudioTracks();
+      
+      // Fix for fullscreen
+      player.elements.container.addEventListener('fullscreenchange', adjustFullscreen);
+    });
+  }
   
-  // Language selector
-  const languageButtons = document.querySelectorAll('.language-btn');
-  languageButtons.forEach(button => {
-    button.addEventListener('click', function() {
-      languageButtons.forEach(btn => btn.classList.remove('active'));
-      this.classList.add('active');
+  function initializeHLSPlayer() {
+    // Check if HLS.js is supported
+    if (Hls.isSupported()) {
+      // Initialize HLS
+      hls = new Hls({
+        maxBufferLength: 30,
+        maxMaxBufferLength: 60,
+        manifestLoadingTimeOut: 10000
+      });
       
-      const language = this.getAttribute('data-lang');
-      // In a real implementation, this would switch audio tracks
-      showFeedback(`Audio changed to ${language}`);
+      // Bind HLS to video element
+      hls.attachMedia(videoElement);
+      
+      // Load source
+      hls.loadSource(videoUrl);
+      
+      // Initialize player once HLS is ready
+      hls.on(Hls.Events.MANIFEST_PARSED, function(event, data) {
+        // Initialize Plyr
+        player = new Plyr(videoElement, {
+          controls: [
+            'play-large', 'play', 'progress', 'current-time', 'duration',
+            'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'
+          ],
+          fullscreen: { enabled: true, fallback: true, iosNative: true }
+        });
+        
+        // Get available quality levels
+        const qualities = data.levels.map((level, index) => {
+          return {
+            name: `${level.height}p`,
+            url: index,
+            selected: index === hls.currentLevel
+          };
+        });
+        
+        // Populate quality options
+        populateQualityOptions(qualities);
+        
+        // Listen for quality changes
+        player.on('qualitychange', () => {
+          // Update quality buttons when changed through player UI
+          const qualityButtons = document.querySelectorAll('#quality-options .control-btn');
+          qualityButtons.forEach(btn => {
+            if (parseInt(btn.dataset.value) === hls.currentLevel) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+        });
+        
+        // Detect audio tracks
+        if (hls.audioTracks && hls.audioTracks.length > 0) {
+          const audioTracks = hls.audioTracks.map((track, index) => {
+            return {
+              name: track.name || `Audio ${index + 1}`,
+              language: track.lang || `Track ${index + 1}`,
+              selected: index === hls.audioTrack
+            };
+          });
+          
+          // Populate audio options
+          populateAudioOptions(audioTracks);
+        } else {
+          // Fallback for audio tracks
+          const audioFallback = [
+            { name: 'Default', language: 'default', selected: true }
+          ];
+          populateAudioOptions(audioFallback);
+        }
+        
+        // Detect subtitles
+        if (hls.subtitleTracks && hls.subtitleTracks.length > 0) {
+          const subtitles = [
+            { name: 'Off', language: 'off', selected: true },
+            ...hls.subtitleTracks.map((track, index) => {
+              return {
+                name: track.name || `Subtitle ${index + 1}`,
+                language: track.lang || `sub${index + 1}`,
+                selected: false
+              };
+            })
+          ];
+          
+          // Populate subtitle options
+          populateSubtitleOptions(subtitles);
+        } else {
+          // Fallback for subtitles
+          const subtitleFallback = [
+            { name: 'None Available', language: 'none', selected: true }
+          ];
+          populateSubtitleOptions(subtitleFallback);
+        }
+      });
+      
+      // Error handling
+      hls.on(Hls.Events.ERROR, function(event, data) {
+        console.error('HLS error:', data);
+        if (data.fatal) {
+          switch (data.type) {
+            case Hls.ErrorTypes.NETWORK_ERROR:
+              showFeedback('Network error, trying to recover...');
+              hls.startLoad();
+              break;
+            case Hls.ErrorTypes.MEDIA_ERROR:
+              showFeedback('Media error, trying to recover...');
+              hls.recoverMediaError();
+              break;
+            default:
+              // Fatal error, try to use standard player
+              showFeedback('Stream error, falling back to standard player');
+              hls.destroy();
+              initializeStandardPlayer();
+              break;
+          }
+        }
+      });
+    } else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
+      // For Safari which has native HLS support
+      videoElement.src = videoUrl;
+      
+      // Initialize standard player
+      initializeStandardPlayer();
+    } else {
+      // Fallback to standard player for browsers that don't support HLS
+      showFeedback('Your browser does not support HLS streams');
+      initializeStandardPlayer();
+    }
+  }
+  
+  function initializeShakaPlayer() {
+    // Check if Shaka Player is supported
+    if (shaka.Player.isBrowserSupported()) {
+      // Initialize Shaka Player
+      shakaPlayer = new shaka.Player(videoElement);
+      
+      // Attach player to UI
+      player = new Plyr(videoElement, {
+        controls: [
+          'play-large', 'play', 'progress', 'current-time', 'duration',
+          'mute', 'volume', 'settings', 'pip', 'airplay', 'fullscreen'
+        ],
+        fullscreen: { enabled: true, fallback: true, iosNative: true }
+      });
+      
+      // Load DASH manifest
+      shakaPlayer.load(videoUrl).then(() => {
+        // Get available tracks
+        const tracks = shakaPlayer.getVariantTracks();
+        
+        // Extract quality options
+        const qualities = tracks
+          .filter(track => track.type === 'variant')
+          .map(track => {
+            return {
+              name: track.height ? `${track.height}p` : 'Auto',
+              url: track.id,
+              selected: track.active
+            };
+          });
+        
+        // Extract audio tracks
+        const audioTracks = tracks
+          .filter(track => track.audioCodec)
+          .map(track => {
+            return {
+              name: track.language || 'Unknown',
+              language: track.language || 'unknown',
+              selected: track.active
+            };
+          });
+        
+        // Extract text tracks (subtitles)
+        const textTracks = shakaPlayer.getTextTracks();
+        const subtitles = [
+          { name: 'Off', language: 'off', selected: true },
+          ...textTracks.map(track => {
+            return {
+              name: track.language || 'Unknown',
+              language: track.language || 'unknown',
+              selected: false
+            };
+          })
+        ];
+        
+        // Populate UI
+        populateQualityOptions(qualities);
+        populateAudioOptions(audioTracks.length > 0 ? audioTracks : [{ name: 'Default', language: 'default', selected: true }]);
+        populateSubtitleOptions(subtitles);
+      }).catch(error => {
+        console.error('Error loading DASH content:', error);
+        showFeedback('Error loading stream, falling back to standard player');
+        initializeStandardPlayer();
+      });
+    } else {
+      // Fallback to standard player
+      showFeedback('Your browser does not support DASH streams');
+      initializeStandardPlayer();
+    }
+  }
+  
+  function populateQualityOptions(qualities) {
+    const qualityOptions = document.getElementById('quality-options');
+    qualityOptions.innerHTML = '';
+    
+    if (qualities.length === 0) {
+      qualityOptions.innerHTML = '<div>No quality options available</div>';
+      return;
+    }
+    
+    // First add an "Auto" option if not already included
+    if (!qualities.some(q => q.name === 'Auto')) {
+      const autoBtn = document.createElement('button');
+      autoBtn.className = 'control-btn active';
+      autoBtn.textContent = 'Auto';
+      autoBtn.dataset.value = 'auto';
+      autoBtn.addEventListener('click', () => switchQuality('auto'));
+      qualityOptions.appendChild(autoBtn);
+    }
+    
+    // Add quality options
+    qualities.forEach(quality => {
+      const btn = document.createElement('button');
+      btn.className = 'control-btn';
+      if (quality.selected) btn.classList.add('active');
+      btn.textContent = quality.name;
+      btn.dataset.value = quality.url;
+      
+      btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('#quality-options .control-btn').forEach(el => {
+          el.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Switch quality
+        switchQuality(quality.url);
+      });
+      
+      qualityOptions.appendChild(btn);
     });
-  });
-});
-
-const currentUrl = window.location.href;
-const finalUrl = currentUrl.replace("/watch/", "/dl/");
-
-function playOnline(player) {
-  const playerUrls = {
-    vlc: `vlc://${finalUrl}`,
-    mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
-    mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
-    np: `nplayer-${finalUrl}`,
-    sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-    km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
-  };
-  window.location.href = playerUrls[player] || finalUrl;
-}
-
-function download() {
-  window.location.href = finalUrl;
-}
-
-function copyLink() {
-  navigator.clipboard.writeText(finalUrl)
-    .then(() => {
-      showFeedback("📋 Link copied to clipboard!");
-    })
-    .catch(err => console.error('Could not copy text: ', err));
-}
-
-function showFeedback(message) {
-  const feedback = document.createElement('div');
-  feedback.className = 'feedback';
-  feedback.textContent = message;
-  feedback.setAttribute("role", "alert");
-  document.body.appendChild(feedback);
-  setTimeout(() => feedback.remove(), 3000);
-}
-</script>
-</body>
-</html>
+  }
+  
+  function populateAudioOptions(audioTracks) {
+    const audioOptions = document.getElementById('audio-options');
+    audioOptions.innerHTML = '';
+    
+    if (audioTracks.length === 0) {
+      audioOptions.innerHTML = '<div>No audio options available</div>';
+      return;
+    }
+    
+    // Add audio track options
+    audioTracks.forEach(track => {
+      const btn = document.createElement('button');
+      btn.className = 'control-btn';
+      if (track.selected) btn.classList.add('active');
+      btn.textContent = track.name;
+      btn.dataset.value = track.language;
+      
+      btn.addEventListener('click', function() {
+        // Remove active class from all buttons
+        document.querySelectorAll('#audio-options .control-btn').forEach(el => {
+          el.classList.remove('active');
+        });
+        
+        // Add active class to clicked button
+        this.classList.add('active');
+        
+        // Switch audio track
+        switchAudioTrack(track.language);
+      });
+      
+      audioOptions.appendChild(btn);
+    });
+  }
+  
+  function populateSubtitleOptions(subtitles) {
+    const subtitleOptions = document.getElementById('subtitle-options');
+    subtitleOptions.innerHTML = '';
+    
+    if (subtitles.length === 0) {
+      subtitleOptions.innerHTML = '<div>No subtitle options available</div>';
+      return

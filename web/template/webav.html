@@ -86,32 +86,9 @@ background-color: #000;
 border: 3px solid var(--dark);
 }
 
-/* Video player styling */
 .plyr {
 width: 100%;
-height: auto;
-aspect-ratio: 16/9;
-}
-
-/* Fullscreen styles */
-.plyr:-webkit-full-screen {
-height: 100%;
-width: 100%;
-}
-
-.plyr:-moz-full-screen {
-height: 100%;
-width: 100%;
-}
-
-.plyr:-ms-fullscreen {
-height: 100%;
-width: 100%;
-}
-
-.plyr:fullscreen {
-height: 100%;
-width: 100%;
+max-height: 75vh;
 }
 
 /* Custom player styling */
@@ -321,14 +298,6 @@ font-weight: 500;
 color: var(--dark);
 opacity: 0.7;
 }
-
-/* Fullscreen button styling */
-.fullscreen-btn {
-margin-top: 10px;
-width: 100%;
-background-color: var(--secondary);
-font-weight: bold;
-}
 </style>
 </head>
 <body>
@@ -339,14 +308,13 @@ font-weight: bold;
 
 <div class="player-container">
 <div class="video-wrapper">
-<video id="player" class="plyr" controls playsinline poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
+<video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
  <source src="{{file_url}}" type="video/mp4">
 Your browser does not support the video tag.
 </video>
+ 
+
 </div>
-<button class="btn fullscreen-btn" onclick="toggleFullscreen()">
-<i class="fas fa-expand"></i> Enter Fullscreen
-</button>
 </div>
 
 <div class="controls">
@@ -404,98 +372,50 @@ KM Player
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Plyr with more options
-    const videoElement = document.getElementById('player');
-    const player = new Plyr(videoElement, {
-        controls: [
-            'play-large', 'play', 'progress', 'current-time', 'mute',
-            'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-        ],
-        fullscreen: { enabled: true, fallback: true, iosNative: true },
-        ratio: '16:9'
-    });
-    
-    // Fix for fullscreen issues
-    player.on('enterfullscreen', () => {
-        videoElement.style.width = '100%';
-        videoElement.style.height = '100%';
-    });
-    
-    // Update title from URL
-    updateTitleFromUrl();
+const videoElement = document.querySelector('.plyr');
+const player = new Plyr(videoElement, {
+controls: [
+'play-large', 'play', 'progress', 'current-time', 'mute',
+'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
+]
 });
-
-function updateTitleFromUrl() {
-    // Extract filename from URL and update title
-    const urlParams = new URLSearchParams(window.location.search);
-    const fileName = urlParams.get('name') || 'Video Player';
-    document.getElementById('file-name').textContent = decodeURIComponent(fileName);
-    document.title = 'MARVAL ZO | ' + decodeURIComponent(fileName);
-}
-
-// Custom fullscreen function
-function toggleFullscreen() {
-    const player = document.getElementById('player');
-    
-    if (!document.fullscreenElement && 
-        !document.mozFullScreenElement && 
-        !document.webkitFullscreenElement && 
-        !document.msFullscreenElement) {
-        // Enter fullscreen
-        if (player.requestFullscreen) {
-            player.requestFullscreen();
-        } else if (player.mozRequestFullScreen) {
-            player.mozRequestFullScreen();
-        } else if (player.webkitRequestFullscreen) {
-            player.webkitRequestFullscreen();
-        } else if (player.msRequestFullscreen) {
-            player.msRequestFullscreen();
-        }
-    } else {
-        // Exit fullscreen
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    }
-}
+});
 
 const currentUrl = window.location.href;
 const finalUrl = currentUrl.replace("/watch/", "/dl/");
 
 function playOnline(player) {
-    const playerUrls = {
-        vlc: `vlc://${finalUrl}`,
-        mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
-        mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
-        np: `nplayer-${finalUrl}`,
-        sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-        km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
-    };
-    window.location.href = playerUrls[player] || finalUrl;
+const playerUrls = {
+vlc: `vlc://${finalUrl}`,
+mxp: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.pro;end`,
+mx: `intent:${finalUrl}#Intent;package=com.mxtech.videoplayer.ad;end`,
+np: `nplayer-${finalUrl}`,
+sp: `intent:${finalUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
+km: `intent:${finalUrl}#Intent;package=com.kmplayer;end`
+};
+window.location.href = playerUrls[player] || finalUrl;
 }
 
 function download() {
-    window.location.href = finalUrl;
+window.location.href = finalUrl;
 }
 
 function copyLink() {
-    navigator.clipboard.writeText(finalUrl)
-    .then(() => {
-        const feedback = document.createElement('div');
-        feedback.className = 'feedback';
-        feedback.textContent = "📋 Link copied to clipboard!";
-        feedback.setAttribute("role", "alert");
-        document.body.appendChild(feedback);
-        setTimeout(() => feedback.remove(), 3000);
-    })
-    .catch(err => console.error('Could not copy text: ', err));
+navigator.clipboard.writeText(finalUrl)
+.then(() => {
+const feedback = document.createElement('div');
+feedback.className = 'feedback';
+feedback.textContent = "📋 Link copied to clipboard!";
+feedback.setAttribute("role", "alert");
+document.body.appendChild(feedback);
+setTimeout(() => feedback.remove(), 3000);
+})
+.catch(err => console.error('Could not copy text: ', err));
 }
+
+
+
+  
 </script>
 </body>
 </html>

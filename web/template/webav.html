@@ -396,15 +396,90 @@ document.addEventListener('DOMContentLoaded', () => {
         fullscreen: { 
             enabled: true,
             fallback: true,
-            iosNative: true
+            iosNative: true,
+            container: null  // Allow fullscreen on entire page
         },
         ratio: '16:9',
         clickToPlay: true
     });
     
+    // Enhanced fullscreen handling
+    player.on('enterfullscreen', () => {
+        const playerContainer = document.querySelector('.player-container');
+        const videoWrapper = document.querySelector('.video-wrapper');
+        
+        // Add fullscreen classes for extra control
+        playerContainer.classList.add('fullscreen-active');
+        videoWrapper.classList.add('fullscreen-active');
+        
+        // Force fullscreen styles
+        document.body.style.overflow = 'hidden';
+        
+        // Additional fullscreen fix for stubborn browsers
+        setTimeout(() => {
+            const plyrElement = document.querySelector('.plyr');
+            if (plyrElement) {
+                plyrElement.style.position = 'fixed';
+                plyrElement.style.top = '0';
+                plyrElement.style.left = '0';
+                plyrElement.style.width = '100vw';
+                plyrElement.style.height = '100vh';
+                plyrElement.style.zIndex = '9999';
+                plyrElement.style.background = '#000';
+            }
+        }, 100);
+    });
+    
+    player.on('exitfullscreen', () => {
+        const playerContainer = document.querySelector('.player-container');
+        const videoWrapper = document.querySelector('.video-wrapper');
+        
+        // Remove fullscreen classes
+        playerContainer.classList.remove('fullscreen-active');
+        videoWrapper.classList.remove('fullscreen-active');
+        
+        // Restore body overflow
+        document.body.style.overflow = '';
+        
+        // Reset plyr styles
+        setTimeout(() => {
+            const plyrElement = document.querySelector('.plyr');
+            if (plyrElement) {
+                plyrElement.style.position = '';
+                plyrElement.style.top = '';
+                plyrElement.style.left = '';
+                plyrElement.style.width = '';
+                plyrElement.style.height = '';
+                plyrElement.style.zIndex = '';
+                plyrElement.style.background = '';
+            }
+        }, 100);
+    });
+    
     const video = document.querySelector('video');
     if (video) {
         video.load();
+        
+        // Additional fullscreen support using native API
+        video.addEventListener('dblclick', () => {
+            if (!document.fullscreenElement) {
+                if (video.requestFullscreen) {
+                    video.requestFullscreen();
+                } else if (video.webkitRequestFullscreen) {
+                    video.webkitRequestFullscreen();
+                } else if (video.msRequestFullscreen) {
+                    video.msRequestFullscreen();
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                }
+            }
+        });
     }
 });
 

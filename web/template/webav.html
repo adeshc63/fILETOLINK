@@ -84,7 +84,7 @@ position: relative;
 width: 100%;
 background-color: #000;
 border: 3px solid var(--dark);
-overflow: hidden; /* Added to fix full screen issue */
+overflow: hidden;
 }
 
 .plyr {
@@ -92,13 +92,12 @@ width: 100%;
 max-height: 75vh;
 }
 
-/* Custom player styling */
 .plyr--video {
 border-radius: 0;
 }
 
 .plyr--fullscreen-enabled [data-plyr=fullscreen] {
-display: inline-block !important; /* Force display fullscreen button */
+display: inline-block !important;
 }
 
 .plyr__control--overlaid {
@@ -375,128 +374,220 @@ KM Player
 <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Get the current file URL from the page URL
     const urlParams = new URLSearchParams(window.location.search);
     const fileUrl = urlParams.get('url') || '{{file_url}}';
     const fileName = urlParams.get('name') || '{{file_name}}';
     
-    // Update the file name and source if available in URL params
     if (urlParams.has('name')) {
         document.getElementById('file-name').textContent = fileName;
         document.title = `MARVAL ZO | ${fileName}`;
     }
     
-    // Update video source if available
     const videoSource = document.querySelector('.plyr source');
     if (urlParams.has('url') && videoSource) {
         videoSource.src = fileUrl;
     }
     
-    // Initialize Plyr with specific options
     const player = new Plyr('.plyr', {
         controls: [
             'play-large', 'play', 'progress', 'current-time', 'mute',
             'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
         ],
         fullscreen: { 
-            enabled: true,     // Enable fullscreen
-            fallback: true,    // Use fallback method if needed
-            iosNative: true    // Use native fullscreen in iOS
+            enabled: true,
+            fallback: true,
+            iosNative: true
         },
-        ratio: '16:9',         // Set aspect ratio
-        clickToPlay: true      // Click anywhere on video to play/pause
+        ratio: '16:9',
+        clickToPlay: true
     });
     
-    // Ensure the video element is properly loaded
     const video = document.querySelector('video');
     if (video) {
         video.load();
     }
 });
 
-// Get the direct URL for download/sharing
 function getDirectUrl() {
     const urlParams = new URLSearchParams(window.location.search);
     const fileUrl = urlParams.get('url') || '{{file_url}}';
     return fileUrl;
 }
 
+function getFileName() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('name') || '{{file_name}}';
+}
+
+function showFeedback(message) {
+    const feedback = document.createElement('div');
+    feedback.className = 'feedback';
+    feedback.textContent = message;
+    feedback.setAttribute("role", "alert");
+    document.body.appendChild(feedback);
+    setTimeout(() => feedback.remove(), 3000);
+}
+
 function playOnline(player) {
     const directUrl = getDirectUrl();
-    const encodedUrl = encodeURIComponent(directUrl);
+    const fileName = getFileName();
     
-    const playerUrls = {
-        vlc: `vlc://${directUrl}`,
-        mx: `intent:${directUrl}#Intent;package=com.mxtech.videoplayer.ad;S.title={{file_name}};end`,
-        mxp: `intent:${directUrl}#Intent;package=com.mxtech.videoplayer.pro;S.title={{file_name}};end`,
-        np: `nplayer-${directUrl}`,
-        sp: `intent:${directUrl}#Intent;action=com.young.simple.player.playback_online;package=com.young.simple.player;end`,
-        km: `intent:${directUrl}#Intent;package=com.kmplayer;end`
-    };
-    
-    // Try to open the media in the selected player
-    try {
-        window.location.href = playerUrls[player] || directUrl;
-        
-        // For MX Player specifically, add a fallback
-        if (player === 'mx') {
-            // Set a timeout to check if MX Player didn't open
-            setTimeout(() => {
-                // Try alternative MX Player URL format
-                window.location.href = `intent:${directUrl}#Intent;type=video/mp4;package=com.mxtech.videoplayer.ad;S.title={{file_name}};end`;
-            }, 1000);
-        }
-    } catch (err) {
-        console.error("Error launching external player:", err);
-        // Fallback - just navigate to the direct URL
-        window.location.href = directUrl;
+    // Validate URL
+    if (!directUrl || directUrl === '{{file_url}}') {
+        showFeedback('❌ Video URL not found!');
+        return;
     }
+    
+    let playerUrl;
+    
+    switch(player) {
+        case 'vlc':
+            // VLC for Android
+            playerUrl = `vlc://${directUrl}`;
+            break;
+            
+        case 'mx':
+            // MX Player - Updated intent format
+            playerUrl = `intent:${directUrl}#Intent;type=video/*;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(fileName)};end`;
+            break;
+            
+        case 'np':
+            // nPlayer
+            playerUrl = `nplayer-${directUrl}`;
+            break;
+            
+        case 'sp':
+            // S Player (Simple Player)
+            playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.young.simple.player;S.title=${encodeURIComponent(fileName)};end`;
+            break;
+            
+        case 'km':
+            // KM Player
+            playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.kmplayer;S.title=${encodeURIComponent(fileName)};end`;
+            break;
+            
+        default:
+            playerUrl = directUrl;
+    }
+    
+    try {
+        showFeedback(`🎬 Opening in ${getPlayerName(player)}...`);
+        
+        // Create a temporary link for better compatibility
+        const link = document.createElement('a');
+        link.href = playerUrl;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Fallback for MX Player if the first attempt doesn't work
+        if (player === 'mx') {
+            setTimeout(() => {
+                // Try MX Player Pro as fallback
+                const fallbackUrl = `intent:${directUrl}#Intent;type=video/*;package=com.mxtech.videoplayer.pro;S.title=${encodeURIComponent(fileName)};end`;
+                const fallbackLink = document.createElement('a');
+                fallbackLink.href = fallbackUrl;
+                fallbackLink.target = '_blank';
+                document.body.appendChild(fallbackLink);
+                fallbackLink.click();
+                document.body.removeChild(fallbackLink);
+            }, 1500);
+        }
+        
+    } catch (error) {
+        console.error('Error opening external player:', error);
+        showFeedback('❌ Could not open external player');
+        
+        // Final fallback - open direct URL
+        setTimeout(() => {
+            window.open(directUrl, '_blank');
+        }, 1000);
+    }
+}
+
+function getPlayerName(player) {
+    const names = {
+        'vlc': 'VLC Mobile',
+        'mx': 'MX Player',
+        'np': 'nPlayer',
+        'sp': 'S Player',
+        'km': 'KM Player'
+    };
+    return names[player] || 'External Player';
 }
 
 function download() {
     const directUrl = getDirectUrl();
-    // Create a temporary link to trigger download
-    const a = document.createElement('a');
-    a.href = directUrl;
-    a.download = '{{file_name}}';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const fileName = getFileName();
+    
+    if (!directUrl || directUrl === '{{file_url}}') {
+        showFeedback('❌ Download URL not found!');
+        return;
+    }
+    
+    try {
+        // Method 1: Try direct download
+        const a = document.createElement('a');
+        a.href = directUrl;
+        a.download = fileName;
+        a.target = '_blank';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        
+        showFeedback('📥 Download started!');
+        
+    } catch (error) {
+        console.error('Download error:', error);
+        // Fallback: Open in new tab
+        window.open(directUrl, '_blank');
+        showFeedback('📥 Opening download link...');
+    }
 }
 
 function copyLink() {
     const directUrl = getDirectUrl();
-    navigator.clipboard.writeText(directUrl)
-    .then(() => {
-        const feedback = document.createElement('div');
-        feedback.className = 'feedback';
-        feedback.textContent = "📋 Link copied to clipboard!";
-        feedback.setAttribute("role", "alert");
-        document.body.appendChild(feedback);
-        setTimeout(() => feedback.remove(), 3000);
-    })
-    .catch(err => {
-        console.error('Could not copy text: ', err);
-        // Fallback method for browsers that don't support clipboard API
-        const textarea = document.createElement('textarea');
-        textarea.value = directUrl;
-        textarea.style.position = 'fixed';
-        document.body.appendChild(textarea);
-        textarea.focus();
-        textarea.select();
-        try {
-            document.execCommand('copy');
-            const feedback = document.createElement('div');
-            feedback.className = 'feedback';
-            feedback.textContent = "📋 Link copied to clipboard!";
-            feedback.setAttribute("role", "alert");
-            document.body.appendChild(feedback);
-            setTimeout(() => feedback.remove(), 3000);
-        } catch (err) {
-            console.error('Fallback: Could not copy text: ', err);
-        }
-        document.body.removeChild(textarea);
-    });
+    
+    if (!directUrl || directUrl === '{{file_url}}') {
+        showFeedback('❌ Link not found!');
+        return;
+    }
+    
+    if (navigator.clipboard && window.isSecureContext) {
+        // Modern approach
+        navigator.clipboard.writeText(directUrl)
+        .then(() => {
+            showFeedback('📋 Link copied to clipboard!');
+        })
+        .catch(() => {
+            fallbackCopy(directUrl);
+        });
+    } else {
+        // Fallback for older browsers or non-HTTPS
+        fallbackCopy(directUrl);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.left = '-999999px';
+    textarea.style.top = '-999999px';
+    document.body.appendChild(textarea);
+    textarea.focus();
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        showFeedback('📋 Link copied to clipboard!');
+    } catch (err) {
+        console.error('Could not copy text:', err);
+        showFeedback('❌ Could not copy link');
+    }
+    
+    document.body.removeChild(textarea);
 }
 </script>
 </body>

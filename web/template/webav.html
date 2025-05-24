@@ -418,6 +418,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Additional fullscreen fix for stubborn browsers
         setTimeout(() => {
             const plyrElement = document.querySelector('.plyr');
+            const videoElement = document.querySelector('video');
+            
             if (plyrElement) {
                 plyrElement.style.position = 'fixed';
                 plyrElement.style.top = '0';
@@ -426,6 +428,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 plyrElement.style.height = '100vh';
                 plyrElement.style.zIndex = '9999';
                 plyrElement.style.background = '#000';
+            }
+            
+            if (videoElement) {
+                videoElement.style.width = '100vw';
+                videoElement.style.height = '100vh';
+                videoElement.style.objectFit = 'cover';  // Force cover mode
             }
         }, 100);
     });
@@ -444,6 +452,8 @@ document.addEventListener('DOMContentLoaded', () => {
         // Reset plyr styles
         setTimeout(() => {
             const plyrElement = document.querySelector('.plyr');
+            const videoElement = document.querySelector('video');
+            
             if (plyrElement) {
                 plyrElement.style.position = '';
                 plyrElement.style.top = '';
@@ -452,6 +462,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 plyrElement.style.height = '';
                 plyrElement.style.zIndex = '';
                 plyrElement.style.background = '';
+            }
+            
+            if (videoElement) {
+                videoElement.style.width = '';
+                videoElement.style.height = '';
+                videoElement.style.objectFit = '';
             }
         }, 100);
     });

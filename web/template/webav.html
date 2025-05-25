@@ -96,8 +96,46 @@ max-height: 75vh;
 border-radius: 0;
 }
 
+/* Enhanced fullscreen styles */
 .plyr--fullscreen-enabled [data-plyr=fullscreen] {
 display: inline-block !important;
+}
+
+.plyr--fullscreen {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+width: 100vw !important;
+height: 100vh !important;
+z-index: 9999 !important;
+background: #000 !important;
+}
+
+.plyr--fullscreen .plyr__video-wrapper,
+.plyr--fullscreen .plyr__video-wrapper video {
+width: 100% !important;
+height: 100% !important;
+object-fit: contain !important;
+}
+
+/* Force landscape on mobile fullscreen */
+@media screen and (max-width: 768px) {
+.plyr--fullscreen {
+transform: rotate(90deg) !important;
+transform-origin: center center !important;
+width: 100vh !important;
+height: 100vw !important;
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+}
+
+.plyr--fullscreen .plyr__video-wrapper,
+.plyr--fullscreen .plyr__video-wrapper video {
+transform: rotate(-90deg) !important;
+width: 100vh !important;
+height: 100vw !important;
+}
 }
 
 .plyr__control--overlaid {
@@ -397,25 +435,33 @@ document.addEventListener('DOMContentLoaded', () => {
             enabled: true,
             fallback: true,
             iosNative: true,
-            container: null  // Allow fullscreen on entire page
+            container: null
         },
         ratio: '16:9',
         clickToPlay: true
     });
     
-    // Enhanced fullscreen handling
+    // Enhanced fullscreen handling with landscape lock
     player.on('enterfullscreen', () => {
-        const playerContainer = document.querySelector('.player-container');
-        const videoWrapper = document.querySelector('.video-wrapper');
-        
-        // Add fullscreen classes for extra control
-        playerContainer.classList.add('fullscreen-active');
-        videoWrapper.classList.add('fullscreen-active');
-        
-        // Force fullscreen styles
         document.body.style.overflow = 'hidden';
         
-        // Additional fullscreen fix for stubborn browsers
+        // Lock to landscape on mobile
+        if (screen.orientation && screen.orientation.lock) {
+            screen.orientation.lock('landscape').catch(e => {
+                console.log('Screen orientation lock failed:', e);
+            });
+        }
+        
+        // Fallback for older browsers
+        if (screen.lockOrientation) {
+            screen.lockOrientation('landscape');
+        } else if (screen.mozLockOrientation) {
+            screen.mozLockOrientation('landscape');
+        } else if (screen.msLockOrientation) {
+            screen.msLockOrientation('landscape');
+        }
+        
+        // Force fullscreen video dimensions
         setTimeout(() => {
             const plyrElement = document.querySelector('.plyr');
             const videoElement = document.querySelector('video');
@@ -431,25 +477,22 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             
             if (videoElement) {
-                videoElement.style.width = '100vw';
-                videoElement.style.height = '100vh';
-                videoElement.style.objectFit = 'cover';  // Force cover mode
+                videoElement.style.width = '100%';
+                videoElement.style.height = '100%';
+                videoElement.style.objectFit = 'contain';
             }
         }, 100);
     });
     
     player.on('exitfullscreen', () => {
-        const playerContainer = document.querySelector('.player-container');
-        const videoWrapper = document.querySelector('.video-wrapper');
-        
-        // Remove fullscreen classes
-        playerContainer.classList.remove('fullscreen-active');
-        videoWrapper.classList.remove('fullscreen-active');
-        
-        // Restore body overflow
         document.body.style.overflow = '';
         
-        // Reset plyr styles
+        // Unlock orientation
+        if (screen.orientation && screen.orientation.unlock) {
+            screen.orientation.unlock();
+        }
+        
+        // Reset styles
         setTimeout(() => {
             const plyrElement = document.querySelector('.plyr');
             const videoElement = document.querySelector('video');
@@ -476,28 +519,37 @@ document.addEventListener('DOMContentLoaded', () => {
     if (video) {
         video.load();
         
-        // Additional fullscreen support using native API
+        // Double-click fullscreen
         video.addEventListener('dblclick', () => {
             if (!document.fullscreenElement) {
-                if (video.requestFullscreen) {
-                    video.requestFullscreen();
-                } else if (video.webkitRequestFullscreen) {
-                    video.webkitRequestFullscreen();
-                } else if (video.msRequestFullscreen) {
-                    video.msRequestFullscreen();
-                }
+                enterFullscreen();
             } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
+                exitFullscreen();
             }
         });
     }
 });
+
+function enterFullscreen() {
+    const video = document.querySelector('video');
+    if (video.requestFullscreen) {
+        video.requestFullscreen();
+    } else if (video.webkitRequestFullscreen) {
+        video.webkitRequestFullscreen();
+    } else if (video.msRequestFullscreen) {
+        video.msRequestFullscreen();
+    }
+}
+
+function exitFullscreen() {
+    if (document.exitFullscreen) {
+        document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+        document.webkitExitFullscreen();
+    } else if (document.msExitFullscreen) {
+        document.msExitFullscreen();
+    }
+}
 
 function getDirectUrl() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -523,77 +575,98 @@ function playOnline(player) {
     const directUrl = getDirectUrl();
     const fileName = getFileName();
     
-    // Validate URL
     if (!directUrl || directUrl === '{{file_url}}') {
         showFeedback('❌ Video URL not found!');
         return;
     }
     
     let playerUrl;
+    let fallbackUrl;
     
     switch(player) {
         case 'vlc':
-            // VLC for Android
+            // Multiple VLC schemes for better compatibility
             playerUrl = `vlc://${directUrl}`;
+            fallbackUrl = `vlc-x-callback://x-callback-url/stream?url=${encodeURIComponent(directUrl)}`;
             break;
             
         case 'mx':
-            // MX Player - Updated intent format
-            playerUrl = `intent:${directUrl}#Intent;type=video/*;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(fileName)};end`;
+            // Primary MX Player intent
+            playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.ad;S.title=${encodeURIComponent(fileName)};end`;
+            fallbackUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.mxtech.videoplayer.pro;S.title=${encodeURIComponent(fileName)};end`;
             break;
             
         case 'np':
-            // nPlayer
+            // nPlayer with proper scheme
             playerUrl = `nplayer-${directUrl}`;
+            fallbackUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.newin.nplayer;S.title=${encodeURIComponent(fileName)};end`;
             break;
             
         case 'sp':
             // S Player (Simple Player)
-            playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.young.simple.player;S.title=${encodeURIComponent(fileName)};end`;
+            playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.google.android.apps.youtube.music;S.title=${encodeURIComponent(fileName)};end`;
+            fallbackUrl = directUrl;
             break;
             
         case 'km':
             // KM Player
             playerUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.kmplayer;S.title=${encodeURIComponent(fileName)};end`;
+            fallbackUrl = `intent:${directUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.pandora.kmplayer;S.title=${encodeURIComponent(fileName)};end`;
             break;
             
         default:
             playerUrl = directUrl;
     }
     
-    try {
-        showFeedback(`🎬 Opening in ${getPlayerName(player)}...`);
-        
-        // Create a temporary link for better compatibility
-        const link = document.createElement('a');
-        link.href = playerUrl;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        
-        // Fallback for MX Player if the first attempt doesn't work
-        if (player === 'mx') {
+    showFeedback(`🎬 Opening in ${getPlayerName(player)}...`);
+    
+    // Try primary URL
+    tryOpenUrl(playerUrl, () => {
+        // If primary fails, try fallback
+        if (fallbackUrl) {
             setTimeout(() => {
-                // Try MX Player Pro as fallback
-                const fallbackUrl = `intent:${directUrl}#Intent;type=video/*;package=com.mxtech.videoplayer.pro;S.title=${encodeURIComponent(fileName)};end`;
-                const fallbackLink = document.createElement('a');
-                fallbackLink.href = fallbackUrl;
-                fallbackLink.target = '_blank';
-                document.body.appendChild(fallbackLink);
-                fallbackLink.click();
-                document.body.removeChild(fallbackLink);
+                tryOpenUrl(fallbackUrl, () => {
+                    // If both fail, open direct URL
+                    setTimeout(() => {
+                        window.open(directUrl, '_blank');
+                        showFeedback('📱 Opening direct link...');
+                    }, 1000);
+                });
             }, 1500);
+        } else {
+            // No fallback, open direct URL
+            setTimeout(() => {
+                window.open(directUrl, '_blank');
+                showFeedback('📱 Opening direct link...');
+            }, 1000);
         }
+    });
+}
+
+function tryOpenUrl(url, onFail) {
+    try {
+        // Create invisible iframe to test if URL scheme works
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+        
+        // Also try direct window.location
+        window.location.href = url;
+        
+        // Clean up iframe
+        setTimeout(() => {
+            document.body.removeChild(iframe);
+        }, 3000);
+        
+        // If we're still here after 2 seconds, probably failed
+        setTimeout(() => {
+            if (onFail) onFail();
+        }, 2000);
         
     } catch (error) {
-        console.error('Error opening external player:', error);
-        showFeedback('❌ Could not open external player');
-        
-        // Final fallback - open direct URL
-        setTimeout(() => {
-            window.open(directUrl, '_blank');
-        }, 1000);
+        console.error('Error opening URL:', error);
+        if (onFail) onFail();
     }
 }
 
@@ -618,11 +691,11 @@ function download() {
     }
     
     try {
-        // Method 1: Try direct download
         const a = document.createElement('a');
         a.href = directUrl;
         a.download = fileName;
         a.target = '_blank';
+        a.rel = 'noopener noreferrer';
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
@@ -631,7 +704,6 @@ function download() {
         
     } catch (error) {
         console.error('Download error:', error);
-        // Fallback: Open in new tab
         window.open(directUrl, '_blank');
         showFeedback('📥 Opening download link...');
     }
@@ -646,7 +718,6 @@ function copyLink() {
     }
     
     if (navigator.clipboard && window.isSecureContext) {
-        // Modern approach
         navigator.clipboard.writeText(directUrl)
         .then(() => {
             showFeedback('📋 Link copied to clipboard!');
@@ -655,7 +726,6 @@ function copyLink() {
             fallbackCopy(directUrl);
         });
     } else {
-        // Fallback for older browsers or non-HTTPS
         fallbackCopy(directUrl);
     }
 }

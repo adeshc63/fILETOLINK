@@ -1,3 +1,5 @@
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE -->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -5,366 +7,84 @@
     <meta property="og:image" content="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/live.png">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AV BOTz | Video Player</title>
+    <title>AV BOTz | {{file_name}}</title>
     <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon">
     <link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        header {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: #fff;
-            padding: 30px;
-            text-align: center;
-        }
-
-        #file-name {
-            font-size: 24px;
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-
-        .file-info {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-
-        .player-container {
-            background: #000;
-            margin: 20px;
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-        }
-
-        .video-wrapper {
-            position: relative;
-            background: #000;
-        }
-
-        video {
-            width: 100%;
-            height: auto;
-            min-height: 400px;
-            background: #000;
-        }
-
-        .controls {
-            background: #f8f9fa;
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-
-        .btn {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: #fff;
-            border: none;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-family: inherit;
-            font-size: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn:active {
-            transform: translateY(0);
-        }
-
-        .btn i {
-            font-size: 18px;
-        }
-
-        .section-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #333;
-            margin: 30px 30px 20px;
-        }
-
-        .player-grid {
-            padding: 0 30px 30px;
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 15px;
-        }
-
-        .player-btn {
-            background: #fff;
-            color: #333;
-            border: 2px solid #e9ecef;
-            padding: 20px;
-            border-radius: 12px;
-            font-family: inherit;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .player-btn:hover {
-            border-color: #667eea;
-            background: #f8f9ff;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .player-logo {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
-
-        .social-section {
-            background: #f8f9fa;
-            padding: 30px;
-            border-top: 1px solid #e9ecef;
-        }
-
-        .social-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .social-link {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-            background: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            text-decoration: none;
-            color: #333;
-            font-weight: 500;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            border: 2px solid transparent;
-        }
-
-        .social-link:hover {
-            border-color: #667eea;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-        }
-
-        .social-link img {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-        }
-
-        .feedback {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: #28a745;
-            color: #fff;
-            padding: 15px 25px;
-            border-radius: 10px;
-            font-weight: 500;
-            box-shadow: 0 10px 25px rgba(40, 167, 69, 0.3);
-            z-index: 1000;
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes slideIn {
-            from {
-                transform: translateX(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        /* Plyr custom styling */
-        .plyr {
-            border-radius: 12px;
-        }
-
-        .plyr--video .plyr__controls {
-            background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
-        }
-
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                border-radius: 15px;
-            }
-            
-            header {
-                padding: 20px;
-            }
-            
-            #file-name {
-                font-size: 20px;
-            }
-            
-            .player-container {
-                margin: 15px;
-            }
-            
-            video {
-                min-height: 250px;
-            }
-            
-            .controls {
-                grid-template-columns: 1fr;
-            }
-            
-            .player-grid {
-                grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-                padding: 0 20px 20px;
-            }
-            
-            .social-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-            
-            .section-title {
-                margin: 20px 20px 15px;
-                font-size: 18px;
-            }
-        }
-    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/style.css">
 </head>
 
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE -->
+    
 <body>
     <div class="container">
         <header>
-            <h1 id="file-name">Video Player</h1>
-            <div class="file-info">High Quality Video Streaming</div>
+            <h1 id="file-name">{{file_name}}</h1>
         </header>
-        
         <div class="player-container">
             <div class="video-wrapper">
-                <video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
-                    <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4">
+                <video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png" alt="Video Player Poster Image">
+                    <source src="{{file_url}}" type="video/mp4" alt="Video Source">
                     Your browser does not support the video tag.
                 </video>
             </div>
         </div>
 
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE-->
+        
         <div class="controls">
             <button class="btn download" onclick="download()">
-                <i class="fas fa-download"></i>
-                Download Video
+                <i class="fas fa-cloud-download-alt"></i> Download
             </button>
             <button class="btn copy-link" onclick="copyLink()">
-                <i class="fas fa-link"></i>
-                Copy Link
+                <i class="fas fa-link"></i> Copy Link
+            </button>
+        </div> 
+        <div class="container">
+            <button class="btn download" onclick="playOnline('vlc')">
+                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/vlc.png" alt="VLC Mobile" class="player-logo"> VLC Mobile
+            </button>
+            <button class="btn copy-link" onclick="playOnline('mx')">
+                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/mx.png" alt="MX Player" class="player-logo"> MX Player
+            </button>
+            <button class="btn download" onclick="playOnline('np')">
+                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/nPlayer.webp" alt="nPlayer" class="player-logo"> nPlayer
+            </button>
+            <button class="btn download" onclick="playOnline('sp')">
+                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/splayer.webp" alt="S Player" class="player-logo"> S Player
+            </button>
+            <button class="btn download" onclick="playOnline('km')">
+                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/km.webp" alt="KM Player" class="player-logo"> KM Player
             </button>
         </div>
 
-        <h2 class="section-title">Open with External Players</h2>
-        <div class="player-grid">
-            <button class="player-btn" onclick="playOnline('vlc')">
-                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/vlc.png" alt="VLC" class="player-logo">
-                VLC Player
-            </button>
-            <button class="player-btn" onclick="playOnline('mx')">
-                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/mx.png" alt="MX Player" class="player-logo">
-                MX Player
-            </button>
-            <button class="player-btn" onclick="playOnline('np')">
-                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/nPlayer.webp" alt="nPlayer" class="player-logo">
-                nPlayer
-            </button>
-            <button class="player-btn" onclick="playOnline('sp')">
-                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/splayer.webp" alt="S Player" class="player-logo">
-                S Player
-            </button>
-            <button class="player-btn" onclick="playOnline('km')">
-                <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/km.webp" alt="KM Player" class="player-logo">
-                KM Player
-            </button>
-        </div>
-
-        <div class="social-section">
-            <h2 class="section-title" style="margin: 0 0 20px;">Connect with us</h2>
-            <div class="social-grid">
-                <a href="http://youtube.com/@avbotx" class="social-link">
-                    <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/youtube.png" alt="YouTube">
-                    YouTube
-                </a>
-                <a href="http://GitHub.com/Botsthe" class="social-link">
-                    <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/github.png" alt="GitHub">
-                    GitHub
-                </a>
-                <a href="http://t.me/BOT_OWNER26" class="social-link">
-                    <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/telegram.png" alt="Telegram">
-                    Telegram
-                </a>
-                <a href="https://www.instagram.com/aman_developerr" class="social-link">
-                    <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/instagram.png" alt="Instagram">
-                    Instagram
-                </a>
-            </div>
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE-->
+        
+        <div class="container">
+            <header>
+                <a href="http://youtube.com/@avbotx"> <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/youtube.png" class="player-logo"></a>
+                <a href="http://GitHub.com/Botsthe"> <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/github.png" class="player-logo"></a>
+                <a href="http://t.me/BOT_OWNER26"> <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/telegram.png" class="player-logo"></a>
+                <a href="https://www.instagram.com/aman_developerr"> <img src="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/instagram.png" class="player-logo"></a>
+            </header>
         </div>
     </div>
 
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE-->
+    
     <script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const videoElement = document.querySelector('.plyr');
-            const player = new Plyr(videoElement, {
-                controls: ['play-large', 'play', 'progress', 'current-time', 'duration', 'mute', 'volume', 'settings', 'fullscreen'],
-                settings: ['quality', 'speed'],
-                quality: {
-                    default: 720,
-                    options: [1080, 720, 480, 360]
-                }
-            });
+            new Plyr(videoElement);
         });
 
         const currentUrl = window.location.href;
         const finalUrl = currentUrl.replace("/watch/", "/dl/");
 
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE-->
+        
         function playOnline(player) {
             const playerUrls = {
                 vlc: `vlc://${finalUrl}`,
@@ -386,21 +106,15 @@
                 .then(() => {
                     const feedback = document.createElement('div');
                     feedback.className = 'feedback';
-                    feedback.innerHTML = '<i class="fas fa-check"></i> Link copied successfully!';
+                    feedback.textContent = "📋 Link copied to clipboard!";
                     feedback.setAttribute("role", "alert");
                     document.body.appendChild(feedback);
                     setTimeout(() => feedback.remove(), 3000);
                 })
-                .catch(err => {
-                    console.error('Could not copy text: ', err);
-                    const feedback = document.createElement('div');
-                    feedback.className = 'feedback';
-                    feedback.style.background = '#dc3545';
-                    feedback.innerHTML = '<i class="fas fa-times"></i> Failed to copy link';
-                    document.body.appendChild(feedback);
-                    setTimeout(() => feedback.remove(), 3000);
-                });
+                .catch(err => console.error('Could not copy text: ', err));
         }
     </script>
 </body>
-</html>
+</html
+
+<!-- this code is modified @BOT_OWNER26 tg :- @AV_BOTz_UPDATE-->

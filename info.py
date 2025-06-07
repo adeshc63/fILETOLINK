@@ -18,14 +18,14 @@ BOT_USERNAME = environ.get("BOT_USERNAME", 'Adsh4_bot') # without @
 BIN_CHANNEL = int(environ.get("BIN_CHANNEL", '-1002141063405')) # admin your channel in stream 
 LOG_CHANNEL = int(environ.get("LOG_CHANNEL", '-1002141063405')) # admin your channel in users log 
 ADMINS = [int(admin) if id_pattern.search(admin) else admin for admin in environ.get('ADMINS', '821243884').split()] # 3567788, 678899, 5889467
-OWNER_USERNAME = environ.get("OWNER_USERNAME", 'BOT_OWNER26') # without @ 
+OWNER_USERNAME = environ.get("OWNER_USERNAME", 'marvaldoom') # without @ 
 
 # pics information
 PICS = environ.get('PICS', 'https://envs.sh/_pM.jpg')
 
 # channel link information
-CHANNEL = environ.get('CHANNEL', 'https://t.me/AV_BOTz_UPDATE')
-SUPPORT = environ.get('SUPPORT', 'https://t.me/AV_SUPPORT_GROUP')
+CHANNEL = environ.get('CHANNEL', 'https://t.me/marvaldoom')
+SUPPORT = environ.get('SUPPORT', 'https://t.me/marvaldoom')
 
 #Dont Remove My Credit @AV_BOTz_UPDATE 
 #This Repo Is By @BOT_OWNER26 

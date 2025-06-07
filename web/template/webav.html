@@ -83,20 +83,38 @@ overflow: hidden;
 .video-wrapper {
 position: relative;
 width: 100%;
-height: 500px;
+height: 0;
+padding-bottom: 56.25%; /* 16:9 aspect ratio */
 background-color: #000;
 border: 3px solid var(--dark);
 }
 
 .video-js {
+position: absolute !important;
+top: 0 !important;
+left: 0 !important;
 width: 100% !important;
-height: 500px !important;
+height: 100% !important;
 max-height: none !important;
 }
 
 .video-js .vjs-tech {
 width: 100% !important;
 height: 100% !important;
+object-fit: contain !important;
+}
+
+/* Full screen styles */
+.video-js.vjs-fullscreen {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+width: 100% !important;
+height: 100% !important;
+z-index: 9999 !important;
+}
+
+.video-js.vjs-fullscreen .vjs-tech {
 object-fit: contain !important;
 }
 
@@ -111,17 +129,64 @@ border-radius: 0 !important;
 background-color: var(--accent1) !important;
 }
 
+/* Mobile optimizations */
 @media (max-width: 768px) {
+body {
+padding: 10px 5px;
+}
+
+.container {
+padding: 10px;
+}
+
+h1 {
+font-size: 1.2rem;
+padding: 8px 12px;
+transform: rotate(0deg);
+}
+
+.player-container {
+padding: 5px;
+border: 3px solid var(--dark);
+}
+
 .video-wrapper {
-height: 300px;
+border: 2px solid var(--dark);
 }
 
+/* Ensure video takes full width on mobile */
 .video-js {
-height: 300px !important;
+border-radius: 0 !important;
+}
+
+/* Mobile fullscreen optimization */
+.video-js.vjs-fullscreen {
+object-fit: fill !important;
+}
+
+.video-js.vjs-fullscreen .vjs-tech {
+object-fit: fill !important;
+width: 100vw !important;
+height: 100vh !important;
 }
 }
 
+/* Very small screens */
+@media (max-width: 480px) {
+h1 {
+font-size: 1rem;
+padding: 6px 10px;
+}
 
+.player-container {
+margin-bottom: 15px;
+padding: 3px;
+}
+
+.video-wrapper {
+padding-bottom: 56.25%; /* Maintain 16:9 ratio */
+}
+}
 
 .controls {
 display: grid;
@@ -278,21 +343,45 @@ animation: popIn 0.3s ease-out;
 }
 
 @media (max-width: 768px) {
-h1 {
-font-size: 1.5rem;
-padding: 10px 15px;
-}
-
 .controls {
 grid-template-columns: 1fr;
+gap: 10px;
+}
+
+.btn {
+font-size: 0.9rem;
+padding: 12px 15px;
 }
 
 .player-options {
 grid-template-columns: 1fr 1fr;
+gap: 10px;
+}
+
+.player-btn {
+font-size: 0.8rem;
+padding: 10px 8px;
+}
+
+.player-logo {
+width: 20px;
+height: 20px;
 }
 
 .social-links {
 flex-wrap: wrap;
+gap: 15px;
+padding: 15px;
+}
+
+.social-links a {
+width: 45px;
+height: 45px;
+}
+
+.social-links img {
+width: 25px;
+height: 25px;
 }
 }
 
@@ -303,6 +392,12 @@ font-size: 0.8rem;
 font-weight: 500;
 color: var(--dark);
 opacity: 0.7;
+}
+
+@media (max-width: 480px) {
+.copyright {
+font-size: 0.7rem;
+}
 }
 </style>
 </head>
@@ -320,7 +415,9 @@ class="video-js vjs-default-skin"
 controls
 preload="auto"
 poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png"
-data-setup="{}">>
+data-setup="{}"
+playsinline
+webkit-playsinline>
 <source src="{{file_url}}" type="video/mp4">
 <p class="vjs-no-js">
 To view this video please enable JavaScript, and consider upgrading to a web browser that
@@ -391,13 +488,28 @@ const fileUrl = '{{file_url}}';
 const fileName = '{{file_name}}';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Video.js player
+    // Initialize Video.js player with mobile-optimized settings
     videoPlayer = videojs('video-player', {
         fluid: true,
         responsive: true,
         playbackRates: [0.5, 1, 1.25, 1.5, 2],
         controls: true,
-        preload: 'auto'
+        preload: 'auto',
+        html5: {
+            vhs: {
+                overrideNative: true
+            },
+            nativeVideoTracks: false,
+            nativeAudioTracks: false,
+            nativeTextTracks: false
+        },
+        // Mobile-specific options
+        techOrder: ['html5'],
+        playsinline: true,
+        // Fullscreen options
+        fullscreenOptions: {
+            navigationUI: 'hide'
+        }
     });
 
     // Set video source
@@ -406,8 +518,45 @@ document.addEventListener('DOMContentLoaded', () => {
             src: fileUrl,
             type: getVideoType(fileName)
         });
+        
+        // Mobile optimization
+        if (isMobileDevice()) {
+            videoPlayer.fluid(true);
+            videoPlayer.responsive(true);
+            
+            // Handle orientation change
+            window.addEventListener('orientationchange', () => {
+                setTimeout(() => {
+                    videoPlayer.trigger('resize');
+                }, 500);
+            });
+        }
+    });
+
+    // Handle fullscreen events
+    videoPlayer.on('fullscreenchange', () => {
+        if (videoPlayer.isFullscreen()) {
+            // Lock orientation to landscape on mobile if possible
+            if (screen.orientation && screen.orientation.lock) {
+                screen.orientation.lock('landscape').catch(() => {
+                    // Ignore if orientation lock is not supported
+                });
+            }
+        }
+    });
+
+    // Auto-resize on window resize
+    window.addEventListener('resize', () => {
+        if (videoPlayer) {
+            videoPlayer.trigger('resize');
+        }
     });
 });
+
+// Check if device is mobile
+function isMobileDevice() {
+    return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+}
 
 // Get video MIME type from filename
 function getVideoType(filename) {

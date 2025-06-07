@@ -120,6 +120,26 @@ color: var(--primary);
 background: var(--accent1);
 }
 
+/* Fix for fullscreen video display */
+.plyr--fullscreen-active {
+position: fixed !important;
+top: 0 !important;
+left: 0 !important;
+right: 0 !important;
+bottom: 0 !important;
+height: 100% !important;
+width: 100% !important;
+z-index: 10000 !important;
+background: #000 !important;
+}
+
+.plyr--fullscreen-active .plyr__video-wrapper,
+.plyr--fullscreen-active video {
+height: 100vh !important;
+width: 100vw !important;
+object-fit: contain !important;
+}
+
 .controls {
 display: grid;
 grid-template-columns: 1fr 1fr;
@@ -316,17 +336,6 @@ opacity: 0.7;
 Your browser does not support the video tag.
 </video>
 </div>
-
-<!-- Audio Track Selection Menu -->
-<div class="audio-tracks-menu" style="margin-top: 10px; padding: 10px; background-color: var(--accent1); border: 3px solid var(--dark); box-shadow: var(--shadow-offset) var(--shadow-offset) 0 var(--dark);">
-<div style="display: flex; align-items: center; gap: 10px;">
-<i class="fas fa-volume-up" style="font-size: 1.2rem;"></i>
-<label for="audio-track-select" style="font-family: 'Unbounded', cursive; font-weight: 700;">Audio Track:</label>
-<select id="audio-track-select" style="padding: 8px; border: 2px solid var(--dark); background-color: white; font-family: 'Space Grotesk', sans-serif;">
-<option value="">Loading tracks...</option>
-</select>
-</div>
-</div>
 </div>
 
 <div class="controls">
@@ -401,7 +410,12 @@ document.addEventListener('DOMContentLoaded', () => {
             'play-large', 'play', 'progress', 'current-time', 'mute',
             'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
         ],
-        settings: ['captions', 'quality', 'speed']
+        settings: ['captions', 'quality', 'speed'],
+        fullscreen: {
+            enabled: true,
+            fallback: true,
+            iosNative: true
+        }
     });
     
     // Handle MKV files with Shaka Player
@@ -418,7 +432,7 @@ function getFileExtension(filename) {
     return filename.split('.').pop().toLowerCase();
 }
 
-// Initialize Shaka Player for MKV and other formats
+// Initialize Shaka Player for MKV and other formats (simplified)
 function initShaka() {
     console.log("Initializing Shaka Player for MKV");
     shaka.polyfill.installAll();
@@ -433,53 +447,7 @@ function initShaka() {
         
         // Try to load the video
         shakaInstance.load(fileUrl).then(function() {
-            console.log('MKV loaded');
-            
-            // Get available audio tracks
-            const tracks = shakaInstance.getVariantTracks();
-            const audioTrackSelect = document.getElementById('audio-track-select');
-            
-            // Clear the loading option
-            audioTrackSelect.innerHTML = '';
-            
-            // Group tracks by audio language
-            const audioLanguages = {};
-            tracks.forEach(track => {
-                if (track.audioId) {
-                    const lang = track.language || 'Unknown';
-                    if (!audioLanguages[lang]) {
-                        audioLanguages[lang] = [];
-                    }
-                    audioLanguages[lang].push(track);
-                }
-            });
-            
-            // If no audio tracks found
-            if (Object.keys(audioLanguages).length === 0) {
-                const option = document.createElement('option');
-                option.text = 'No audio tracks available';
-                option.disabled = true;
-                audioTrackSelect.appendChild(option);
-            } else {
-                // Add options for each language
-                Object.keys(audioLanguages).forEach(lang => {
-                    const track = audioLanguages[lang][0]; // Use the first track of each language
-                    const option = document.createElement('option');
-                    option.value = track.id;
-                    option.text = `${lang} (${track.audioCodec || 'Unknown codec'})`;
-                    option.selected = track.active;
-                    audioTrackSelect.appendChild(option);
-                });
-                
-                // Add event listener for audio track selection
-                audioTrackSelect.addEventListener('change', function() {
-                    const selectedTrackId = parseInt(this.value);
-                    const selectedTrack = tracks.find(track => track.id === selectedTrackId);
-                    if (selectedTrack) {
-                        shakaInstance.selectVariantTrack(selectedTrack, true);
-                    }
-                });
-            }
+            console.log('MKV loaded successfully');
             
             // Configure Shaka Player for better performance
             shakaInstance.configure({abr: {enabled: true}});

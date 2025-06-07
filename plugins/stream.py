@@ -48,10 +48,8 @@ async def private_receive_handler(c: Client, m: Message):
         file_link = f"https://t.me/{BOT_USERNAME}?start=file_{msg.id}"
         share_link = f"https://t.me/share/url?url={file_link}"
         
-        await msg.reply_text(
-            text=f"Requested By: [{m.from_user.first_name}](tg://user?id={m.from_user.id})\nUser ID: {m.from_user.id}\nStream Link: {stream}",
-            disable_web_page_preview=True, quote=True
-        )
+        # Removed the message reply that was sending an attached message with user info
+        # This was causing an unwanted attached message to appear with files
 
         # ✅ अगर file_name मौजूद है तो पूरा कैप्शन भेजें, वरना सिर्फ डाउनलोड लिंक भेजें
         if file_name:

@@ -28,8 +28,8 @@ Nᴀᴍᴇ - {}"""
     ABOUT_TXT = """<b>╔═══❰ {} ❱══════❍
 ║╭━━━━━━━━━━━━━━━━━━➣
 ║┣⪼ 🤖 ᴍʏ ɴᴀᴍᴇ : {}
-║┣⪼ 👦 ᴅᴇᴠᴇʟᴏᴘᴇʀ : <a href='https://t.me/marvaldoom'>ᴀᴠ ᴄʜᴀᴛ ᴏᴡɴᴇʀ</a>
-║┣⪼ ❣️ ᴜᴘᴅᴀᴛᴇ : <a href="https://t.me/marvaldoom">ᴀᴠ ʙᴏᴛᴢ</a>
+║┣⪼ 👦 ᴅᴇᴠᴇʟᴏᴘᴇʀ : <a href='https://t.me/marvaldoom'>ᴄʜᴀᴛ ᴏᴡɴᴇʀ</a>
+║┣⪼ ❣️ ᴜᴘᴅᴀᴛᴇ : <a href="https://t.me/marvaldoom">ʙᴏᴛᴢ</a>
 ║┣⪼ ⏲️ ᴜᴘᴛɪᴍᴇ : {}
 ║┣⪼ 📡 ʜᴏsᴛᴇᴅ ᴏɴ : ᴋᴏʏᴇʙ 
 ║┣⪼ 🗣️ ʟᴀɴɢᴜᴀɢᴇ : ᴘʏᴛʜᴏɴ 
@@ -53,7 +53,7 @@ Nᴀᴍᴇ - {}"""
 
 <b>📥 Download : </b> <code>{4}</code>
 
-<b>🚸 Nᴏᴛᴇ : LINK WON'T EXPIRE TILL I DELETE 🤡</b>"""
+<b>🚸 Nᴏᴛᴇ : LINK WON'T EXPIRE TILL I DELETE </b>"""
 
     CAPTION2_TXT = """
 <i><u>𝗬𝗼𝘂𝗿 𝗟𝗶𝗻𝗸 𝗚𝗲𝗻𝗲𝗿𝗮𝘁𝗲𝗱 !</u></i>
@@ -66,4 +66,4 @@ Nᴀᴍᴇ - {}"""
 
 <b>📥 Download : </b> <code>{3}</code>
 
-<b>🚸 Nᴏᴛᴇ : LINK WON'T EXPIRE TILL I DELETE 🤡</b>"""
+<b>🚸 Nᴏᴛᴇ : LINK WON'T EXPIRE TILL I DELETE </b>"""

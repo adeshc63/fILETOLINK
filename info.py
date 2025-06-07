@@ -80,9 +80,9 @@ else:
 FQDN = str(getenv('FQDN', BIND_ADDRESS)) if not ON_HEROKU or getenv('FQDN', '') else APP_NAME+'.herokuapp.com'
 HAS_SSL=bool(getenv('HAS_SSL',False))
 if HAS_SSL:
-    URL = "https://cloudy-kania-adeshc63-2c360e70.koyeb.app/".format(FQDN)
+    URL = "https://https://marvaldoom.koyeb.app/".format(FQDN)
 else:
-    URL = "https://cloudy-kania-adeshc63-2c360e70.koyeb.app/".format(FQDN, "" if NO_PORT else ":" + str(PORT))
+    URL = "https://https://marvaldoom.koyeb.app/".format(FQDN, "" if NO_PORT else ":" + str(PORT))
       
 #Dont Remove My Credit @AV_BOTz_UPDATE 
 #This Repo Is By @BOT_OWNER26 

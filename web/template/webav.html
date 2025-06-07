@@ -7,12 +7,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MARVAL ZO | {{file_name}}</title>
 <link rel="icon" href="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/logo.png" type="image/x-icon">
-<link rel="stylesheet" href="https://cdn.plyr.io/3.7.8/plyr.css">
+<link href="https://vjs.zencdn.net/8.6.1/video-js.css" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=Space+Grotesk:wght@300;500;700&display=swap" rel="stylesheet">
-<!-- Include Hls.js for HLS streaming and Shaka Player for more format support -->
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
-<script src="https://cdn.jsdelivr.net/npm/shaka-player@latest/dist/shaka-player.compiled.js"></script>
+<script src="https://vjs.zencdn.net/8.6.1/video.min.js"></script>
 <style>
 :root {
 --primary: #FF3366;
@@ -89,35 +87,21 @@ background-color: #000;
 border: 3px solid var(--dark);
 }
 
-.plyr {
-width: 100%;
+.video-js {
+width: 100% !important;
+height: auto !important;
 max-height: 75vh;
 }
 
-/* Custom player styling */
-.plyr--video {
-border-radius: 0;
+.video-js .vjs-big-play-button {
+background-color: var(--primary) !important;
+border: 2px solid var(--dark) !important;
+box-shadow: 3px 3px 0 var(--dark) !important;
+border-radius: 0 !important;
 }
 
-.plyr__control--overlaid {
-background: var(--primary);
-border: 2px solid var(--dark);
-box-shadow: 3px 3px 0 var(--dark);
-}
-
-.plyr__control--overlaid:hover {
-background: var(--accent1);
-transform: scale(1.1);
-}
-
-.plyr--full-ui input[type=range] {
-color: var(--primary);
-}
-
-.plyr__control.plyr__tab-focus,
-.plyr__control:hover,
-.plyr__control[aria-expanded=true] {
-background: var(--accent1);
+.video-js .vjs-big-play-button:hover {
+background-color: var(--accent1) !important;
 }
 
 
@@ -313,9 +297,18 @@ opacity: 0.7;
 
 <div class="player-container">
 <div class="video-wrapper">
-<video class="plyr" controls poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png">
+<video
+id="video-player"
+class="video-js vjs-default-skin"
+controls
+preload="auto"
+poster="https://cdn.jsdelivr.net/gh/Botsthe/DATABASE@main/image/well.png"
+data-setup="{}">>
 <source src="{{file_url}}" type="video/mp4">
-Your browser does not support the video tag.
+<p class="vjs-no-js">
+To view this video please enable JavaScript, and consider upgrading to a web browser that
+<a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>.
+</p>
 </video>
 </div>
 </div>
@@ -372,85 +365,44 @@ KM Player
 </div>
 </div>
 
-<script src="https://cdn.plyr.io/3.7.8/plyr.js"></script>
 <script>
 // Global variables
-let plyrPlayer;
-let shakaInstance = null;
+let videoPlayer;
 const currentUrl = window.location.href;
 const finalUrl = currentUrl.replace("/watch/", "/dl/");
 const fileUrl = '{{file_url}}';
 const fileName = '{{file_name}}';
 
 document.addEventListener('DOMContentLoaded', () => {
-    const videoElement = document.querySelector('.plyr');
-    const fileExtension = getFileExtension(fileName);
-    
-    // Initialize Plyr with more controls
-    plyrPlayer = new Plyr(videoElement, {
-        controls: [
-            'play-large', 'play', 'progress', 'current-time', 'mute',
-            'volume', 'captions', 'settings', 'pip', 'airplay', 'fullscreen'
-        ],
-        settings: ['captions', 'quality', 'speed'],
-        fullscreen: {
-            enabled: true,
-            fallback: true,
-            iosNative: true
-        }
+    // Initialize Video.js player
+    videoPlayer = videojs('video-player', {
+        fluid: true,
+        responsive: true,
+        playbackRates: [0.5, 1, 1.25, 1.5, 2],
+        controls: true,
+        preload: 'auto'
     });
-    
-    // Handle MKV files with Shaka Player
-    if (fileExtension === 'mkv') {
-        initShaka();
-    } else {
-        // For MP4 and other formats that work well with native player
-        videoElement.src = fileUrl;
-    }
+
+    // Set video source
+    videoPlayer.ready(() => {
+        videoPlayer.src({
+            src: fileUrl,
+            type: getVideoType(fileName)
+        });
+    });
 });
 
-// Get file extension from filename
-function getFileExtension(filename) {
-    return filename.split('.').pop().toLowerCase();
-}
-
-// Initialize Shaka Player for MKV and other formats (simplified)
-function initShaka() {
-    console.log("Initializing Shaka Player for MKV");
-    shaka.polyfill.installAll();
-    
-    const video = document.querySelector('video');
-    
-    if (shaka.Player.isBrowserSupported()) {
-        shakaInstance = new shaka.Player(video);
-        
-        // Listen for error events
-        shakaInstance.addEventListener('error', onErrorEvent);
-        
-        // Try to load the video
-        shakaInstance.load(fileUrl).then(function() {
-            console.log('MKV loaded successfully');
-            
-            // Configure Shaka Player for better performance
-            shakaInstance.configure({abr: {enabled: true}});
-        }).catch(onError);
-    } else {
-        console.error('Browser not supported for Shaka Player');
-        // Fallback to regular player
-        video.src = fileUrl;
-    }
-}
-
-// Error handling for Shaka Player
-function onErrorEvent(event) {
-    onError(event.detail);
-}
-
-function onError(error) {
-    console.error('Error loading MKV video:', error);
-    // Fallback to direct link if Shaka fails
-    const video = document.querySelector('video');
-    video.src = fileUrl;
+// Get video MIME type from filename
+function getVideoType(filename) {
+    const extension = filename.split('.').pop().toLowerCase();
+    const mimeTypes = {
+        'mp4': 'video/mp4',
+        'webm': 'video/webm',
+        'ogg': 'video/ogg',
+        'mkv': 'video/mp4', // Fallback for MKV
+        'avi': 'video/mp4'  // Fallback for AVI
+    };
+    return mimeTypes[extension] || 'video/mp4';
 }
 
 function playOnline(player) {

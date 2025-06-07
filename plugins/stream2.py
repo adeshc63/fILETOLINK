@@ -36,10 +36,8 @@ async def channel_receive_handler(bot: Client, broadcast: Message):
         download = f"{URL}{msg.id}?hash={get_hash(msg)}"
         file_link = f"https://t.me/{BOT_USERNAME}?start=file_{msg.id}"
             
-        await msg.reply_text(
-            text=f"**Channel Name:** `{broadcast.chat.title}`\n**CHANNEL ID:** `{broadcast.chat.id}`\n**Rᴇǫᴜᴇsᴛ ᴜʀʟ:** {stream}",
-            quote=True
-            )
+        # Removed the message reply that was sending channel information
+        # This was causing an unwanted attached message to appear with files
             
         # कैप्शन अपडेट करें
         new_caption = f"<i><a href='{CHANNEL}'>{file_name}</a></i>"

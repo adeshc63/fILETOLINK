@@ -133,11 +133,33 @@ z-index: 10000 !important;
 background: #000 !important;
 }
 
-.plyr--fullscreen-active .plyr__video-wrapper,
+.plyr--fullscreen-active .plyr__video-wrapper {
+height: 100vh !important;
+width: 100vw !important;
+display: flex !important;
+align-items: center !important;
+justify-content: center !important;
+}
+
 .plyr--fullscreen-active video {
 height: 100vh !important;
 width: 100vw !important;
-object-fit: contain !important;
+object-fit: cover !important;
+max-height: none !important;
+max-width: none !important;
+}
+
+/* Alternative fullscreen fix - covers full screen properly */
+.plyr--fullscreen-active .plyr__video-wrapper video {
+position: absolute !important;
+top: 50% !important;
+left: 50% !important;
+transform: translate(-50%, -50%) !important;
+min-height: 100vh !important;
+min-width: 100vw !important;
+width: auto !important;
+height: auto !important;
+object-fit: cover !important;
 }
 
 .controls {
